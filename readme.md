@@ -1,0 +1,45 @@
+# screenshot
+
+# Features
+
+- uses Chrome via Electron, which is much easier to install than phantomjs (thanks to precompiled packages) and renders web fonts etc. as expected
+- capture sources:
+  - local file paths
+  - http and https URLs
+  - strings of HTML (piped in or via the API)
+- capture options:
+  - window size
+  - cropping a specific region and/or offset
+  - capture a specific element by selector
+  - perform other actions on specific elements on the page before screenshotting
+  - customize wait timeout (or after a custom-named callback is called on the page)
+  - wait timeout (for killing the process)
+  - zoom factor / scaling
+- HTTP options
+  - CURL-like:
+    - https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/devtools/front_end/network/NetworkLogView.js&q=_generateCurlCommand&sq=package:chromium&type=cs&l=1725
+    - cookies
+    - custom headers
+    - basic auth
+  - injection:
+    - inject HTML / CSS / JS onto the page
+  - custom behavior on different HTTP codes
+- output formats:
+  - png
+  - jpeg
+  - PDF?
+    - paper-format
+    - paper-orientation
+    - paper-margin
+  - gif?
+- diffing
+  - test suite definitions (mocha compatible assertions)
+  - GUI with github-like previews
+    - two-way
+    - three way https://github.com/stefanjudis/grunt-photobox
+    - side by side
+    - onion skin
+    - assertion name, assert message
+- streaming API
+  - chainable
+  - request-like .defaults
