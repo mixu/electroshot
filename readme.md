@@ -9,18 +9,21 @@
   - strings of HTML (piped in or via the API)
 - capture options:
   - window size
-  - cropping a specific region and/or offset
+  - cropping a specific region and/or offset ({top}x{left}x{width}x{height} on CLI)
   - capture a specific element by selector
   - perform other actions on specific elements on the page before screenshotting
   - customize wait timeout (or after a custom-named callback is called on the page)
   - wait timeout (for killing the process)
   - zoom factor / scaling
+  - transparent bg or color
 - HTTP options
   - CURL-like:
     - https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/devtools/front_end/network/NetworkLogView.js&q=_generateCurlCommand&sq=package:chromium&type=cs&l=1725
     - cookies
     - custom headers
     - basic auth
+    - ignore SSL errors
+    - set user agent
   - injection:
     - inject HTML / CSS / JS onto the page
   - custom behavior on different HTTP codes
@@ -31,15 +34,22 @@
     - paper-format
     - paper-orientation
     - paper-margin
-  - gif?
-- diffing
+- thumbnails / montage
+- diffing: https://github.com/Huddle/Resemble.js
   - test suite definitions (mocha compatible assertions)
   - GUI with github-like previews
+    - generate two-way as image
     - two-way
     - three way https://github.com/stefanjudis/grunt-photobox
     - side by side
     - onion skin
     - assertion name, assert message
+    - responsive sizes by default
+    - www_google_com_320x480.jpeg
+    - www_google_com_480x320.jpeg
+    - www_google_com_1024x768.jpeg
+    - www_google_com_768x1024.jpeg
+    - www_google_com_1280x768.jpeg
 - streaming API
   - chainable
   - request-like .defaults
