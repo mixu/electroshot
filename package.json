@@ -4,17 +4,18 @@
   "description": "# Features",
   "main": "test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -R spec ./test/*.test.js"
   },
   "repository": {
     "type": "git",
     "url": "git@bitbucket.org:mixu/electroshot.git"
   },
   "author": "Mikito Takada <mikito.takada@gmail.com> (http://mixu.net/)",
-  "license": "ISC",
+  "license": "BSD",
   "dependencies": {
     "electron-prebuilt": "~0.33.6",
     "express": "~4.13.3",
+    "file-fixture": "0.0.2",
     "miniq": "~1.0.0",
     "subarg": "~1.0.0"
   }
