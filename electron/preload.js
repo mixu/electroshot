@@ -1,4 +1,5 @@
 var ipc = require('ipc');
+var webFrame = require('web-frame');
 
 function waitFor(num, onDone) {
   if (num) {
@@ -46,6 +47,11 @@ ipc.on('get-dimensions', function ensureRendered(selector) {
     width: result.right - result.left,
     height: result.bottom - result.top,
   });
+});
+
+ipc.on('set-zoom-factor', function(factor) {
+  console.log('set-zoom-factor', factor);
+  webFrame.setZoomFactor(factor);
 });
 
 console.log('SEND', 'window-loaded');

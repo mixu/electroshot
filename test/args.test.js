@@ -9,6 +9,9 @@ argsToTasks = function(args) {
     if (task.delay === 0) {
       delete task.delay;
     }
+    if (task['zoom-factor'] === 1) {
+      delete task['zoom-factor'];
+    }
     if (!task.selector) {
       delete task.selector;
     }
@@ -280,29 +283,37 @@ describe('args to tasks', function() {
     ]);
   });
 
+  it('accepts --zoom-factor <n> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--zoom-factor', '2', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        'zoom-factor': 2,
+      }
+    ]);
+  });
 
-  // --selector <element>
-  // --zoom-factor
   // Chrome flags passing
-
+  // --format <png | jpg> (--quality)
+  // Capture strings of HTML
+  //   --stdin-html
+  // smart filenames
+  // good looking messages V Generated 3 screenshots from 2 urls
 
 
   // when given multiple pages on the same domain (??): use the full path + qs
   // -> https://github.com/sindresorhus/filenamify-url
 
-  // default values vs overrides in groups
-
   // options:
   // --delay name of callback
   // --filename <template>
-  // --format <png | jpg> (--quality)
   // --keywords (http://viewportsizes.com/)
   // maybe not:
   // --hide
   // other actions on elements ? custom script??
   // --debug (pop open electron window, verbose logging)
   // --parallel <n> (num windows)
-  // good looking messages V Generated 3 screenshots from 2 urls
   // Remap --crop ???
 
   // cool:

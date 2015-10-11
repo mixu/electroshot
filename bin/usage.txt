@@ -2,35 +2,57 @@ USAGE
 
     shot [options] [url(s)] [resolution(s)]
 
+URL EXAMPLES
+
+    http://...         Captures a specific http url.
+    https://...        Captures a specific https url.
+
+    ./some/file.html   Captures a local files by mounting `./some` under localhost using a HTTP server,
+    /some/file.html    and then requesting `/file.html`.
+
+RESOLUTION EXAMPLES
+
+    1024x768           Captures a screenshot which is cropped to 1024px width and 768px height.
+
+    1024x              Captures a screenshot which is 1024px wide, and as tall needed for the page.
+
+    1024               Same as above.
+
 OPTIONS
 
     --out <dir>        Write the screenshots to a specific directory (default: process.cwd)
 
-    --delay <ms>       Waits a number of milliseconds before taking a screenshot. Defaults to 0,
-                       which simply waits until two `requestAnimationFrame` calls have passed.
-
-
-OPTIONS - SERVER
-
-    --host <hostname>  Hostname for serving local files, defaults to `localhost`.
-
-    --port <port>      Port for serving local files, defaults to `3000`.
-
     --root <dir>       For local files, mount a specific directory as the web root; the web root
                        defaults to the directory the local files are in.
 
-OPTIONS - MISC
+    --delay <ms>       Waits a number of milliseconds before taking a screenshot. Defaults to 0,
+                       which simply waits until two `requestAnimationFrame` calls have passed.
+
+    --selector <expr>  Captures a specific DOM element using a CSS selector using document.querySelector.
+                       The screenshot is cropped and sized to match the element as it appears on the page.
+
+    --zoom-factor <n>  The default zoom factor of the page; e.g. 1.0 represents 100% and 3.0 represents 300%.
 
     --help, -h         Show this help.
 
     --version, -v      Version info.
 
+TODO
+
+    file://...         Captures a local file by loading the file URL directly, without a static file server.
+
+
 CHROME FLAGS
 
-`shot` passes any unknown flags on to Chrome via Electron. Here are two useful flags:
+`show` passes any unknown flags on to Chrome via Electron. Here are two useful flags:
 
     --ignore-certificate-errors       Ignores certificate related errors.
 
     --force-device-scale-factor <n>   Forces Chrome to use a specific hidpi scale factor.
 
     --proxy-server <address:port>     Use a specified proxy server. Only affects HTTP and HTTPS requests.
+
+
+For more, see: https://github.com/atom/electron/blob/master/docs/api/chrome-command-line-switches.md and
+http://peter.sh/experiments/chromium-command-line-switches/.
+

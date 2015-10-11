@@ -1,6 +1,3 @@
-# screenshot
-
-# Features
 
 - uses Chrome via Electron, which is much easier to install than phantomjs (thanks to precompiled packages) and renders web fonts etc. as expected
 - capture sources:
@@ -15,6 +12,13 @@
   - customize wait timeout (or after a custom-named callback is called on the page)
   - wait timeout (for killing the process)
   - zoom factor / scaling
+- output format
+   - png
+   - jpeg
+
+
+# nonfeatures
+
   - transparent bg or color
 - HTTP options
   - CURL-like:
@@ -28,8 +32,6 @@
     - inject HTML / CSS / JS onto the page
   - custom behavior on different HTTP codes
 - output formats:
-  - png
-  - jpeg
   - PDF?
     - paper-format
     - paper-orientation
