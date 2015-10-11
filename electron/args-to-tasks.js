@@ -1,4 +1,3 @@
-args-to-tasks.js
 var uri = require('url'),
     path = require('path');
 
@@ -27,6 +26,17 @@ function parseUrlsAndSizes(args, rootArgs) {
     var height = parseInt(parts[2], 10);
     return { width: parseInt(parts[1], 10), height: isNaN(height) ? 0 : height };
   });
+
+  // default resolution
+  if (sizes.length === 0) {
+    // via Bootstrap
+    sizes = [
+      { width: 1200, height: 0 }, // Large display
+      { width: 980, height: 0 }, // Default
+      { width: 768, height: 0 }, // Tablet
+      { width: 480, height: 0 } // Mobile
+    ];
+  }
 
   var paths = [],
       urls = [];
