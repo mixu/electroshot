@@ -18,12 +18,9 @@ RESOLUTION EXAMPLES
 
     1024               Same as above.
 
-OPTIONS
+OPTIONS - CAPTURE
 
     --out <dir>        Write the screenshots to a specific directory (default: process.cwd)
-
-    --root <dir>       For local files, mount a specific directory as the web root; the web root
-                       defaults to the directory the local files are in.
 
     --delay <ms>       Waits a number of milliseconds before taking a screenshot. Defaults to 0,
                        which simply waits until two `requestAnimationFrame` calls have passed.
@@ -31,20 +28,31 @@ OPTIONS
     --selector <expr>  Captures a specific DOM element using a CSS selector using document.querySelector.
                        The screenshot is cropped and sized to match the element as it appears on the page.
 
+    --format <png|jpg> Sets the image format (default: png).
+
+    --quality <0..100> Sets the jpg quality parameter (default: 75).
+
     --zoom-factor <n>  The default zoom factor of the page; e.g. 1.0 represents 100% and 3.0 represents 300%.
+
+
+OPTIONS - SERVER
+
+    --host <hostname>  Hostname for serving local files, defaults to `localhost`.
+
+    --port <port>      Port for serving local files, defaults to `3000`.
+
+    --root <dir>       For local files, mount a specific directory as the web root; the web root
+                       defaults to the directory the local files are in.
+
+OPTIONS - MISC
 
     --help, -h         Show this help.
 
     --version, -v      Version info.
 
-TODO
-
-    file://...         Captures a local file by loading the file URL directly, without a static file server.
-
-
 CHROME FLAGS
 
-`show` passes any unknown flags on to Chrome via Electron. Here are two useful flags:
+`shot` passes any unknown flags on to Chrome via Electron. Here are two useful flags:
 
     --ignore-certificate-errors       Ignores certificate related errors.
 
@@ -56,3 +64,15 @@ CHROME FLAGS
 For more, see: https://github.com/atom/electron/blob/master/docs/api/chrome-command-line-switches.md and
 http://peter.sh/experiments/chromium-command-line-switches/.
 
+
+TODO
+
+    file://...         Captures a local file by loading the file URL directly, without a static file server.
+
+    --user-agent <string>  Sets a custom user agent string.
+
+    --cookie <cookie>   Sets a custom cookie. Can be set multiple times.
+
+    --debug            Verbose debugging mode.
+
+    --max-wait <ms>    Set a maximum wait timer, after which a single screenshot is timed out. Good for automation.

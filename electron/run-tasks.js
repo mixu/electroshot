@@ -62,7 +62,7 @@ module.exports = function(tasks) {
         }
 
         console.log('write screenshot', task.out);
-        fs.writeFile(task.out, data.toPng());
+        fs.writeFile(task.out, (task.format === 'png' ? data.toPng() : data.toJpeg(task.quality)));
         if (task['zoom-factor'] !== 1) {
           console.log('SEND', 'set-zoom-factor', task['zoom-factor']);
           mainWindow.webContents.send('set-zoom-factor', task['zoom-factor']);

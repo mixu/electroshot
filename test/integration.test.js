@@ -83,9 +83,35 @@ describe('integration tests', function() {
       ']',
       '--out', tmpDir,
        ], process.cwd(), function() {
-        assert.equal(md5(tmpDir + '/selector-100x100-1.png'), '21d28dbf925e0a0152ff4d2785733f30');
-        assert.equal(md5(tmpDir + '/selector-100x100-2.png'), 'bae69b8086212675c19dfdbba2c84eeb');
+        assert.ok([
+            '21d28dbf925e0a0152ff4d2785733f30', // OSX
+            'bb4ab9d772fd6d9ab92ee8c4646c3df1', // Ubuntu
+          ].indexOf(md5(tmpDir + '/selector-100x100-1.png')) !== -1
+        );
+        assert.ok([
+            'bae69b8086212675c19dfdbba2c84eeb', // OSX
+          ].indexOf(md5(tmpDir + '/selector-100x100-2.png')) !== -1
+        );
         done();
+    });
+  });
+
+  it('can set a Chrome flag', function(done) {
+    this.timeout(5000);
+    var tmpDir = fixture.dirname();
+    run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--force-device-scale-factor', 2], process.cwd(), function() {
+      assert.equal(md5(tmpDir + '/selector-100x100.png'), 'bae69b8086212675c19dfdbba2c84eeb');
+      done();
+    });
+  });
+
+  it('can produce a jpg image', function(done) {
+    this.timeout(5000);
+    var tmpDir = fixture.dirname();
+    run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--format', 'jpg', '--quality', '85'], process.cwd(), function() {
+      // console.log(tmpDir);
+      assert.equal(md5(tmpDir + '/selector-100x100.jpg'), 'd23a7483bfc2010d8ac15793620b98d4');
+      done();
     });
   });
 

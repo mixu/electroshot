@@ -15,6 +15,12 @@ argsToTasks = function(args) {
     if (!task.selector) {
       delete task.selector;
     }
+    if (task.quality === 75) {
+      delete task.quality;
+    }
+    if (task.format === 'png') {
+      delete task.format;
+    }
   });
   return result;
 };
@@ -294,7 +300,17 @@ describe('args to tasks', function() {
     ]);
   });
 
-  // Chrome flags passing
+  it('accepts --format jpg <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--format', 'jpg', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.jpg',
+        format: 'jpg',
+      }
+    ]);
+  });
+
   // --format <png | jpg> (--quality)
   // Capture strings of HTML
   //   --stdin-html

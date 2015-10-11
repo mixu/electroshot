@@ -12,14 +12,15 @@ if (argv.v || argv.version) {
 }
 
 var runTasks = require('./run-tasks.js');
-// Report crashes to our server.
-require('crash-reporter').start();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
 var mainWindow = null;
 
-app.commandLine.appendSwitch('force-device-scale-factor', '1');
+Object.keys(argv).filter(function(key) { return key !== '_' && !argv[key]._; }).map(function(key) {
+  console.log('Setting Chrome flag: ' + key + ' ' + argv[key]);
+  app.commandLine.appendSwitch(key, argv[key]);
+});
 
 app.on('window-all-closed', function() {
   console.log('window-all-closed');
