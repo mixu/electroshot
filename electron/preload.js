@@ -1,6 +1,11 @@
 var ipc = require('ipc');
 
-function onceContentRendered(onDone) {
+function waitFor(num, onDone) {
+  if (num) {
+    setTimeout(onDone, num);
+    return;
+  }
+
   // requestAnimationFrame's callback happens right before a paint. So, it takes two calls
   // before we can be confident that one paint has happened.
   requestAnimationFrame(function() {
@@ -9,21 +14,39 @@ function onceContentRendered(onDone) {
     });
   });
 }
-ipc.on('ensure-rendered', function ensureRendered(eventName) {
+ipc.on('ensure-rendered', function ensureRendered(delay, eventName) {
   console.log('RECEIVE', 'ensure-rendered');
 
-  var style = document.createElement('style');
-  // WebKit hack :(
-  style.appendChild(document.createTextNode(''));
-  document.head.appendChild(style);
-  style.sheet.insertRule('::-webkit-scrollbar { display: none; }');
+  try {
+    var style = document.createElement('style');
+    // WebKit hack :(
+    style.appendChild(document.createTextNode(''));
+    document.head.appendChild(style);
+    style.sheet.insertRule('::-webkit-scrollbar { display: none; }');
+  } catch(e) {}
 
-  onceContentRendered(function() {
+  waitFor(delay, function() {
     console.log('SEND', eventName);
     ipc.send(eventName);
   });
 });
 
+ipc.on('get-dimensions', function ensureRendered(selector) {
+  console.log('get-dimensions', selector);
+  try {
+   var result = document.querySelector(selector).getBoundingClientRect();
+  } catch(e) {
+    console.error('Could not find target ' + selector, e);
+ //  ipc.send('return-dimensions', false);
+    return;
+  }
+  ipc.send('return-dimensions', {
+    x: result.top,
+    y: result.left,
+    width: result.right - result.left,
+    height: result.bottom - result.top,
+  });
+});
 
 console.log('SEND', 'window-loaded');
 ipc.send('window-loaded');

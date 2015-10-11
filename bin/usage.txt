@@ -1,0 +1,36 @@
+USAGE
+
+    shot [options] [url(s)] [resolution(s)]
+
+OPTIONS
+
+    --out <dir>        Write the screenshots to a specific directory (default: process.cwd)
+
+    --delay <ms>       Waits a number of milliseconds before taking a screenshot. Defaults to 0,
+                       which simply waits until two `requestAnimationFrame` calls have passed.
+
+
+OPTIONS - SERVER
+
+    --host <hostname>  Hostname for serving local files, defaults to `localhost`.
+
+    --port <port>      Port for serving local files, defaults to `3000`.
+
+    --root <dir>       For local files, mount a specific directory as the web root; the web root
+                       defaults to the directory the local files are in.
+
+OPTIONS - MISC
+
+    --help, -h         Show this help.
+
+    --version, -v      Version info.
+
+CHROME FLAGS
+
+`shot` passes any unknown flags on to Chrome via Electron. Here are two useful flags:
+
+    --ignore-certificate-errors       Ignores certificate related errors.
+
+    --force-device-scale-factor <n>   Forces Chrome to use a specific hidpi scale factor.
+
+    --proxy-server <address:port>     Use a specified proxy server. Only affects HTTP and HTTPS requests.

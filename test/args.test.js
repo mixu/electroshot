@@ -1,17 +1,56 @@
 var assert = require('assert');
-var argsToTasks = require('../electron/args-to-tasks.js');
+var argsToTasks = require('../lib/args-to-tasks.js');
 var fixture = require('file-fixture');
+
+var oldArgsToTasks = argsToTasks;
+argsToTasks = function(args) {
+  var result = oldArgsToTasks(args);
+  result.forEach(function(task) {
+    if (task.delay === 0) {
+      delete task.delay;
+    }
+    if (!task.selector) {
+      delete task.selector;
+    }
+  });
+  return result;
+};
 
 describe('args to tasks', function() {
 
-  // output path determination
+  // output path spec
+
+  // cases:
+  // - set a full output path for each file
+  //   - single file
+  //      input: <url> <resolution> <path>
+  //   - many files
+  //      input: <url> <url> <resolution> <path> <path>
+  //      input: <url> <resolution> <path> <url> <resolution> <path>
+  //      input: [  <url> <resolution> <path> ] [ <url> <resolution> <path> ] <--- this
+  // - set a output path but use auto filenames for each file
+  //   - single file
+  //      input: --out <path> <url> <resolution>
+  //   - many files
+  //      input: --out <path> <url> <url> <resolution>
+
 
   it('accepts <url> <resolution>', function() {
     assert.deepEqual(argsToTasks(['http://google.com', '1024x768']), [
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        filename: 'google.com-1024x768.png'
+        out: process.cwd() + '/google.com-1024x768.png'
+      }
+    ]);
+  });
+
+  it('accepts --out <path> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--out', '/foo', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: '/foo/google.com-1024x768.png'
       }
     ]);
   });
@@ -21,12 +60,12 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        filename: 'google.com-1024x768.png'
+        out: process.cwd() + '/google.com-1024x768.png'
       },
       {
         url: 'http://google.com/',
         size: { width: 1366, height: 768 },
-        filename: 'google.com-1366x768.png'
+        out: process.cwd() + '/google.com-1366x768.png'
       },
     ]);
   });
@@ -36,12 +75,27 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        filename: 'google.com-1024x768.png'
+        out: process.cwd() + '/google.com-1024x768.png'
       },
       {
         url: 'http://gmail.com/',
         size: { width: 1024, height: 768 },
-        filename: 'gmail.com-1024x768.png'
+        out: process.cwd() + '/gmail.com-1024x768.png'
+      },
+    ]);
+  });
+
+  it('accepts --out <path> <url> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--out', '/foo', 'http://google.com', 'http://gmail.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: '/foo/google.com-1024x768.png'
+      },
+      {
+        url: 'http://gmail.com/',
+        size: { width: 1024, height: 768 },
+        out: '/foo/gmail.com-1024x768.png'
       },
     ]);
   });
@@ -51,7 +105,7 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        filename: 'google.com-1024x768.png'
+        out: process.cwd() + '/google.com-1024x768.png'
       }
     ]);
     assert.deepEqual(argsToTasks([
@@ -61,12 +115,12 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        filename: 'google.com-1024x768.png'
+        out: process.cwd() + '/google.com-1024x768.png'
       },
       {
         url: 'http://gmail.com/',
         size: { width: 1366, height: 768 },
-        filename: 'gmail.com-1366x768.png'
+        out: process.cwd() + '/gmail.com-1366x768.png'
       }
     ]);
   });
@@ -79,16 +133,159 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        filename: 'google.com-1024x768.png'
+        out: process.cwd() + '/google.com-1024x768.png'
       },
       {
         url: 'http://gmail.com/',
         size: { width: 1366, height: 768 },
-        filename: 'gmail.com-1366x768.png'
+        out: process.cwd() + '/gmail.com-1366x768.png'
       }
     ]);
 
   });
+
+  it('can override flags in groups', function() {
+    assert.deepEqual(argsToTasks([ '--out', '/foo', '[', 'http://google.com', '1024x768', '--out', '/bar', ']']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: '/bar/google.com-1024x768.png'
+      }
+    ]);
+  });
+
+  it('missing http:// is added', function() {
+    assert.deepEqual(argsToTasks(['google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png'
+      }
+    ]);
+    assert.deepEqual(argsToTasks(['localhost', '1024x768']), [
+      {
+        url: 'http://localhost/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/localhost-1024x768.png'
+      }
+    ]);
+    assert.deepEqual(argsToTasks(['localhost:8000', '1024x768']), [
+      {
+        url: 'http://localhost:8000/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/localhost-1024x768.png'
+      }
+    ]);
+    assert.deepEqual(argsToTasks(['127.0.0.1:8000', '1024x768']), [
+      {
+        url: 'http://127.0.0.1:8000/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/127.0.0.1-1024x768.png'
+      }
+    ]);
+  });
+
+
+  it('when no resolution is set, use responsive breakpoints', function() {
+    assert.deepEqual(argsToTasks(['google.com']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1200, height: 0 },
+        out: process.cwd() + '/google.com-1200x0.png'
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 980, height: 0 },
+        out: process.cwd() + '/google.com-980x0.png'
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 768, height: 0 },
+        out: process.cwd() + '/google.com-768x0.png'
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 480, height: 0 },
+        out: process.cwd() + '/google.com-480x0.png'
+      }
+    ]);
+  });
+
+  it('height can be undefined (full height)', function() {
+    assert.deepEqual(argsToTasks(['google.com', '1024x']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: process.cwd() + '/google.com-1024x0.png'
+      }
+    ]);
+    assert.deepEqual(argsToTasks(['google.com', '1024']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: process.cwd() + '/google.com-1024x0.png'
+      }
+    ]);
+  });
+
+  it('pathlike thing that exists is parsed as path', function() {
+    var tmpDir = fixture.dir({
+      'some-folder/index.html': '<html>Index.html</html>'
+    });
+
+    // dir
+    assert.deepEqual(argsToTasks(['file://' + tmpDir + '/some-folder/', '1024x768']), [
+      {
+        url: 'file://' + tmpDir + '/some-folder',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/some-folder-1024x768.png'
+      }
+    ]);
+    assert.deepEqual(argsToTasks([tmpDir + '/some-folder', '1024x768']), [
+      {
+        url: 'file://' + tmpDir + '/some-folder',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/some-folder-1024x768.png'
+      }
+    ]);
+    // plain file
+    assert.deepEqual(argsToTasks([tmpDir + '/some-folder/index.html', '1024x768']), [
+      {
+        url: 'file://' + tmpDir + '/some-folder/index.html',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/index-1024x768.png'
+      }
+    ]);
+  });
+
+  it('accepts --delay <n> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--delay', '2000', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        delay: 2000,
+      }
+    ]);
+  });
+
+  it('accepts --selector <expr> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--selector', '#foo', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        selector: '#foo',
+      }
+    ]);
+  });
+
+
+  // --selector <element>
+  // --zoom-factor
+  // Chrome flags passing
+
+
 
   // when given multiple pages on the same domain (??): use the full path + qs
   // -> https://github.com/sindresorhus/filenamify-url
@@ -96,12 +293,9 @@ describe('args to tasks', function() {
   // default values vs overrides in groups
 
   // options:
-  // --delay <ms> || name of callback
+  // --delay name of callback
   // --filename <template>
-  // --selector <element>
   // --format <png | jpg> (--quality)
-  // --scale
-  // --force-device-scale-factor 1
   // --keywords (http://viewportsizes.com/)
   // maybe not:
   // --hide
@@ -111,28 +305,9 @@ describe('args to tasks', function() {
   // good looking messages V Generated 3 screenshots from 2 urls
   // Remap --crop ???
 
-/*
- if (options.selector) {
-   page.clipRect = page.evaluate(function (s) {
-     return document.querySelector(s).getBoundingClientRect();
-   }, options.selector);
- }
-*/
   // cool:
   // - tiling (montage) use case
   // - diffing
-
-
-  // errors:
-  // - no url
-  // - width is undefined
-  // - remove temporary files on error (any error)
-  // - 404 error on URL
-  // - redirects
-  // - SSL errors
-  // - page.onError handler
-  // - cannot exec
-  // - page is very wide or very tall
 
   // web options:
   // - cookies, headers, http auth, userAgent

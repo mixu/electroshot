@@ -1,5 +1,5 @@
 var assert = require('assert');
-var pathsToLocalhost = require('../lib/paths-to-localhost.js');
+var tasksToMountpoints = require('../lib/tasks-to-mountpoints.js');
 var fixture = require('file-fixture');
 
 var baseUrl = 'http://localhost:3000';
@@ -16,7 +16,7 @@ describe('paths to localhost', function() {
     var tasks = [
       { url: 'file://' + tmpDir + '/some-folder' }
     ];
-    assert.deepEqual(pathsToLocalhost(tasks, baseUrl), [
+    assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir + '/some-folder' ]
     ]);
     assert.deepEqual(tasks, [
@@ -32,7 +32,7 @@ describe('paths to localhost', function() {
       { url: 'file://' + tmpDir + '/other.html' },
       { url: 'file://' + tmpDir + '/other-folder/index.html' },
     ];
-    assert.deepEqual(pathsToLocalhost(tasks, baseUrl), [
+    assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir + '/some-folder' ],
       ['/1', tmpDir ],
       ['/2', tmpDir + '/other-folder' ],
@@ -54,7 +54,7 @@ describe('paths to localhost', function() {
       { url: 'file://' + tmpDir + '/other.html', root: tmpDir },
       { url: 'file://' + tmpDir + '/other-folder/index.html', root: tmpDir },
     ];
-    assert.deepEqual(pathsToLocalhost(tasks, baseUrl), [
+    assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir ],
     ]);
     assert.deepEqual(tasks, [
@@ -65,6 +65,29 @@ describe('paths to localhost', function() {
       { url: 'http://localhost:3000/0/other-folder/index.html', root: tmpDir },
     ]);
   });
+
+  it('given a --root, it still adds new mount points for things outside the root', function() {
+    var tasks = [
+      { url: 'file://' + tmpDir + '/some-folder', root: tmpDir + '/some-folder' },
+      { url: 'file://' + tmpDir + '/some-folder/index.html', root: tmpDir + '/some-folder' },
+      { url: 'file://' + tmpDir + '/some-folder/foo.html', root: tmpDir + '/some-folder' },
+      { url: 'file://' + tmpDir + '/other.html', root: tmpDir + '/some-folder' },
+      { url: 'file://' + tmpDir + '/other-folder/index.html', root: tmpDir + '/some-folder' },
+    ];
+    assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
+      ['/0', tmpDir + '/some-folder' ],
+      ['/1', tmpDir ],
+      ['/2', tmpDir + '/other-folder' ],
+    ]);
+    assert.deepEqual(tasks, [
+      { url: 'http://localhost:3000/0', root: tmpDir + '/some-folder' },
+      { url: 'http://localhost:3000/0/index.html', root: tmpDir + '/some-folder'},
+      { url: 'http://localhost:3000/0/foo.html', root: tmpDir + '/some-folder' },
+      { url: 'http://localhost:3000/1/other.html', root: tmpDir + '/some-folder' },
+      { url: 'http://localhost:3000/2/index.html', root: tmpDir + '/some-folder' },
+    ]);
+  });
+
   // support --host
   // support --port
 
