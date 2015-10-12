@@ -4,7 +4,7 @@
   "description": "# Features",
   "main": "test.js",
   "scripts": {
-    "test": "mocha -R spec ./test/*.test.js"
+    "test": "mocha -R spec --bail ./test/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -13,10 +13,13 @@
   "author": "Mikito Takada <mikito.takada@gmail.com> (http://mixu.net/)",
   "license": "BSD",
   "dependencies": {
+    "chromium-emulated-devices": "~1.0.0",
     "electron-prebuilt": "~0.33.6",
     "express": "~4.13.3",
     "file-fixture": "0.0.2",
     "miniq": "~1.0.0",
-    "subarg": "~1.0.0"
+    "sanitize-filename": "~1.4.4",
+    "subarg": "~1.0.0",
+    "xtend": "~4.0.0"
   }
 }

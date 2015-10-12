@@ -3,14 +3,17 @@ var fs = require('fs'),
     path = require('path'),
     spawn = require('child_process').spawn;
 
-var electron = require('electron-prebuilt');
-var express = require('express'),
-    subarg = require('subarg');
+var electron = require('electron-prebuilt'),
+    express = require('express'),
+    subarg = require('subarg'),
+    xtend = require('xtend');
 
-var argsToTasks = require('../lib/args-to-tasks.js'),
+var defaultOptions = require('../lib/default-options.js'),
+    argsToTasks = require('../lib/args-to-tasks.js'),
     tasksToMountpoints = require('../lib/tasks-to-mountpoints.js');
 
-var argv = subarg(process.argv.slice(2));
+var argv = xtend({}, defaultOptions, subarg(process.argv.slice(2)));
+
 if (argv.v || argv.version) {
   console.log('shot v'+ require('../package.json').version);
   spawn(electron, [__dirname + '/../electron/index.js', '--version'], { stdio: 'inherit' });
@@ -23,22 +26,19 @@ if (argv.help || argv.h) {
 }
 
 // expand args
+var baseUrl = 'http://' + argv.host + ':' + argv.port;
 var tasks = argsToTasks(process.argv.slice(2));
-var pairs = tasksToMountpoints(tasks, 'http://localhost:3000');
+var pairs = tasksToMountpoints(tasks, baseUrl);
 
 // set up express server here - node probably already has permission to accept incoming connections whereas electron probably doesn't
 var server;
-var baseUrl = 'http://localhost:3000';
 if (pairs.length > 0) {
   var app = express();
   pairs.forEach(function(pair) {
-    console.log(pair[0], pair[1]);
     app.use(pair[0], express.static(pair[1]));
   });
-  var host = 'localhost';
-  var port = 3000;
-  server = app.listen(3000, function () {
-    console.log('Example app listening at http://' + host + ':' + port);
+  server = app.listen(argv.port, function () {
+    console.log('Express server listening at ' + baseUrl);
     runElectron();
   });
 } else {
@@ -47,8 +47,21 @@ if (pairs.length > 0) {
 
 // run electron and pipe the tasks into it
 function runElectron() {
-  var child = spawn(electron, [__dirname + '/../electron/index.js'].concat(process.argv.slice(2)), {
-    stdio: ['pipe', process.stdout, process.stderr]
+  var electronArgs = [
+    __dirname + '/../electron/index.js'
+  ].concat(Object.keys(argv).filter(function(key) {
+    return typeof defaultOptions[key] === 'undefined' && key !== '_';
+  }).reduce(function(all, key) {
+    if (typeof argv[key] !== 'boolean') {
+      return all.concat([ '--' + key,  argv[key] ]);
+    } else {
+      return all.concat('--' + (argv[key] ? 'no-' : ''));
+    }
+  }, []));
+
+  console.log(electronArgs);
+  var child = spawn(electron, electronArgs, {
+      stdio: ['pipe', process.stdout, process.stderr]
   });
 
   child.stdin.end(JSON.stringify(tasks));
