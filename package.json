@@ -1,7 +1,7 @@
 {
   "name": "electroshot",
   "version": "1.0.0",
-  "description": "# Features",
+  "description": "Capture website screenshots (with web fonts!) using Electron",
   "main": "test.js",
   "scripts": {
     "test": "mocha -R spec --bail ./test/*.test.js"

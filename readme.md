@@ -1,4 +1,6 @@
-# screenshot
+# electroshot
+
+Capture website screenshots (with web fonts!) using Electron.
 
 # Features
 

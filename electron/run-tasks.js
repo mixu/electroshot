@@ -1,4 +1,5 @@
 var fs = require('fs'),
+    os = require('os'),
     path = require('path');
 
 var ipc = require('ipc'),
@@ -14,7 +15,8 @@ module.exports = function(tasks) {
       if (i === 0) {
         mainWindow = new BrowserWindow({
           show: true,
-          'enable-larger-than-screen': true,
+          // SEGFAULTS on linux (!) with Electron 0.33.7 (!!)
+          'enable-larger-than-screen': (os.platform() !== 'linux'),
           'skip-taskbar': true,
           'use-content-size': true,
           // resizable: false,

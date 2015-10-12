@@ -55,7 +55,7 @@ function runElectron() {
     if (typeof argv[key] !== 'boolean') {
       return all.concat([ '--' + key,  argv[key] ]);
     } else {
-      return all.concat('--' + (argv[key] ? 'no-' : ''));
+      return all.concat('--' + (argv[key] ? 'no-' : '') + key);
     }
   }, []));
 
