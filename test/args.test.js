@@ -311,6 +311,36 @@ describe('args to tasks', function() {
     ]);
   });
 
+  it('accepts --emulate-device <device>', function() {
+    assert.deepEqual(argsToTasks(['--emulate-device', 'Apple iPhone 6', 'http://google.com']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 375, height: 667 },
+        out: process.cwd() + '/google.com-1024x768.jpg',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        'emulate-device': {
+          screenPosition: 'mobile',
+          viewSize: { width: 375, height: 667 },
+          deviceScaleFactor: 2,
+        },
+      }
+    ]);
+    assert.deepEqual(argsToTasks(['--emulate-device', 'horizontal Apple iPhone 6', 'http://google.com']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 667, height: 375 },
+        out: process.cwd() + '/google.com-1024x768.jpg',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        'emulate-device': {
+          screenPosition: 'mobile',
+          viewSize: { width: 667, height: 375 },
+          deviceScaleFactor: 2,
+        },
+      }
+    ]);
+  });
+
+
   // --format <png | jpg> (--quality)
   // Capture strings of HTML
   //   --stdin-html

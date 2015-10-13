@@ -36,7 +36,7 @@ if (argv['list-network-conditions']) {
 if (argv['list-devices']) {
   console.log(emulatedDevices.map(function(dev) {
     return [
-      '--emulate-device "' + dev.device.title + '"',
+      '--emulate-device "' + dev.device.title + '" || --emulate-device "horizontal ' + dev.device.title + '"',
       '    ' + dev.device.screen.vertical.width + 'x' + dev.device.screen.vertical.height,
       '    Pixel ratio: ' + dev.device.screen['device-pixel-ratio'],
       '    UA: ' + dev.device['user-agent']

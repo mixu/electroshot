@@ -15,6 +15,7 @@ module.exports = function(tasks) {
         format: task.format,
         quality: task.quality,
         delay: task.delay,
+        'zoom-factor': task['zoom-factor'],
       }, function() {
         if (task.selector) {
           targetWindow.getDimensions(task.selector, function(dims) {

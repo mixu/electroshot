@@ -57,10 +57,29 @@ TargetWindow.prototype.initialize = function(opts, onDone) {
     self.window.webContents.send('ensure-rendered', opts.delay, 'loaded');
   });
 
+  this.window.setContentSize(375, 627);
+  // useful: set the size exactly (contentsize is not useful here)
+  this.window.setSize(375, 627);
+  this.window.setMaximumSize(627, 627);
 
-  this.window.loadUrl(opts.url);
+  this.window.loadUrl(opts.url, {
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4'
+  });
+  // this happens before the page starts executing
+  self.window.webContents.enableDeviceEmulation({
+    screenPosition: 'mobile',
+    screenSize:  { width: 375, height: 627 },
+    viewPosition: { x: 0, y: 0 },
+    offset: {x: 0, y: 0},
+    viewSize: { width: 375, height: 627 },
+    deviceScaleFactor: 2,
+    fitToView: false,
+    scale: 1,
+  });
+
   // to work around https://github.com/atom/electron/issues/1580
   this.window.webContents.executeJavaScript(fs.readFileSync(path.resolve(__dirname + '/preload.js'), 'utf8'));
+
 };
 
 TargetWindow.prototype.reset = function() {
