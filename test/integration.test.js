@@ -50,7 +50,10 @@ describe('integration tests', function() {
     this.timeout(5000);
     var tmpDir = fixture.dirname();
     run([__dirname + '/fixtures/interval.html', '100x100', '--out', tmpDir, '--delay', '1000' ], process.cwd(), function() {
-      assert.equal(md5(tmpDir + '/interval-100x100.png'), '46ead2a024bd27574d6ba36f0b47d793');
+      assert.ok([
+        '46ead2a024bd27574d6ba36f0b47d793',
+        '8875084a1f14c512aaf3310917016ddb', // OSX (2x)
+        ].indexOf(md5(tmpDir + '/interval-100x100.png')) !== -1);
       done();
     });
   });
@@ -59,9 +62,15 @@ describe('integration tests', function() {
     this.timeout(10000);
     var tmpDir = fixture.dirname();
     run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--selector', '#one' ], process.cwd(), function() {
-      assert.equal(md5(tmpDir + '/selector-100x100.png'), '2f4358ac1b145b71c984abc40a3306f3');
+      assert.ok([
+        '2f4358ac1b145b71c984abc40a3306f3',
+        'f7edb2bf6d64146ba7c0286144e71a75', // OSX (2x)
+        ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
       run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--selector', '.two' ], process.cwd(), function() {
-        assert.equal(md5(tmpDir + '/selector-100x100.png'), 'd66cec58520cb2b391354b08c0e802c8');
+        assert.ok([
+          'd66cec58520cb2b391354b08c0e802c8',
+          '36e8405b5c031e412f3fbe669037dee3', // OSX (2x)
+          ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
         done();
       });
     });
@@ -85,11 +94,13 @@ describe('integration tests', function() {
        ], process.cwd(), function() {
         assert.ok([
             '21d28dbf925e0a0152ff4d2785733f30', // OSX
+            '2298cb9cb647cdafe04261ffa1cbbef5', // OSX (2x)
             'bb4ab9d772fd6d9ab92ee8c4646c3df1', // Ubuntu
           ].indexOf(md5(tmpDir + '/selector-100x100-1.png')) !== -1
         );
         assert.ok([
             'bae69b8086212675c19dfdbba2c84eeb', // OSX
+            '03bf106d36c7d05c029347762dbab688', // OSX (2x)
           ].indexOf(md5(tmpDir + '/selector-100x100-2.png')) !== -1
         );
         done();
@@ -100,7 +111,10 @@ describe('integration tests', function() {
     this.timeout(5000);
     var tmpDir = fixture.dirname();
     run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--force-device-scale-factor', 2], process.cwd(), function() {
-      assert.equal(md5(tmpDir + '/selector-100x100.png'), 'bae69b8086212675c19dfdbba2c84eeb');
+      assert.ok([
+        'bae69b8086212675c19dfdbba2c84eeb',
+        '03bf106d36c7d05c029347762dbab688', // OSX (2x)
+        ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
       done();
     });
   });
@@ -110,7 +124,10 @@ describe('integration tests', function() {
     var tmpDir = fixture.dirname();
     run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--format', 'jpg', '--quality', '85'], process.cwd(), function() {
       // console.log(tmpDir);
-      assert.equal(md5(tmpDir + '/selector-100x100.jpg'), 'd23a7483bfc2010d8ac15793620b98d4');
+      assert.ok([
+        'd23a7483bfc2010d8ac15793620b98d4',
+        'bb9d6e3c427eeaf883c675cf7996d73f', // OSX (2x)
+        ].indexOf(md5(tmpDir + '/selector-100x100.jpg')) !== -1);
       done();
     });
   });

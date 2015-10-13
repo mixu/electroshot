@@ -19,7 +19,7 @@ var mainWindow = null;
 
 Object.keys(argv).filter(function(key) { return key !== '_' && !argv[key]._; }).map(function(key) {
   console.log('Setting Chrome flag: ' + key + ' ' + argv[key]);
-  app.commandLine.appendSwitch(key, argv[key]);
+  app.commandLine.appendSwitch(key, argv[key].toString());
 });
 
 app.on('window-all-closed', function() {

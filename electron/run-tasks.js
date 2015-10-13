@@ -59,7 +59,7 @@ module.exports = function(tasks) {
           if (tries > 5) {
             return done(err);
           }
-          setTimeout(tryCapture, 10);
+          setTimeout(tryCapture, 100 * tries);
           return;
         }
 
