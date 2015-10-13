@@ -38,7 +38,7 @@ ipc.on('get-dimensions', function ensureRendered(selector) {
    var result = document.querySelector(selector).getBoundingClientRect();
   } catch(e) {
     console.error('Could not find target ' + selector, e);
- //  ipc.send('return-dimensions', false);
+    ipc.send('return-dimensions', false);
     return;
   }
   ipc.send('return-dimensions', {

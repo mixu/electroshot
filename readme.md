@@ -101,7 +101,7 @@ See: https://github.com/atom/electron/issues/228
 ## Content injection
 
 - injection:
-  - inject HTML / CSS / JS onto the page
+  - inject CSS / JS onto the page
 
 
 ## Device and network emulation

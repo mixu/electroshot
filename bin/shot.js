@@ -6,7 +6,9 @@ var fs = require('fs'),
 var electron = require('electron-prebuilt'),
     express = require('express'),
     subarg = require('subarg'),
-    xtend = require('xtend');
+    xtend = require('xtend'),
+    networkConditions = require('chromium-emulated-networks'),
+    emulatedDevices = require('chromium-emulated-devices').extensions;
 
 var defaultOptions = require('../lib/default-options.js'),
     argsToTasks = require('../lib/args-to-tasks.js'),
@@ -17,6 +19,29 @@ var argv = xtend({}, defaultOptions, subarg(process.argv.slice(2)));
 if (argv.v || argv.version) {
   console.log('shot v'+ require('../package.json').version);
   spawn(electron, [__dirname + '/../electron/index.js', '--version'], { stdio: 'inherit' });
+  return;
+}
+
+if (argv['list-network-conditions']) {
+  console.log(networkConditions.map(function(net) {
+    return [
+      '--emulate-network  "' + net.title + '"',
+      '    Throughput: ' + net.value.throughput + ' Bps',
+      '    RTT latency: ' + net.value.latency + ' ms'
+    ].join('\n');
+  }).join('\n'));
+  return;
+}
+
+if (argv['list-devices']) {
+  console.log(emulatedDevices.map(function(dev) {
+    return [
+      '--emulate-device "' + dev.device.title + '"',
+      '    ' + dev.device.screen.vertical.width + 'x' + dev.device.screen.vertical.height,
+      '    Pixel ratio: ' + dev.device.screen['device-pixel-ratio'],
+      '    UA: ' + dev.device['user-agent']
+    ].join('\n');
+  }).join('\n'));
   return;
 }
 

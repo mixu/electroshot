@@ -14,6 +14,7 @@
   "license": "BSD",
   "dependencies": {
     "chromium-emulated-devices": "~1.0.0",
+    "chromium-emulated-networks": "~1.0.0",
     "electron-prebuilt": "~0.33.6",
     "express": "~4.13.3",
     "file-fixture": "0.0.2",

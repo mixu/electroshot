@@ -132,6 +132,12 @@ describe('integration tests', function() {
     });
   });
 
+  it('can set a custom user agent string', function(done) {
+
+  });
+
+
+
   describe('errors', function() {
 
     it('warns when called with no params', function() {

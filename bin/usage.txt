@@ -44,6 +44,14 @@ OPTIONS - SERVER
     --root <dir>       For local files, mount a specific directory as the web root; the web root
                        defaults to the directory the local files are in.
 
+OPTIONS - NETWORK EMULATION
+
+    --list-network-conditions  Show the list of known network condition presets.
+
+OPTIONS - DEVICE EMULATION
+
+    --list-devices     Show the list of known devices to emulate.
+
 OPTIONS - MISC
 
     --help, -h         Show this help.
@@ -71,7 +79,30 @@ TODO
 
     --user-agent <string>  Sets a custom user agent string.
 
-    --cookie <cookie>   Sets a custom cookie. Can be set multiple times.
+    --cookie <cookie>  Sets a custom cookie. Can be set multiple times.
+
+OPTIONS - NETWORK EMULATION
+
+    --emulate-network  <profile>
+
+    --latency <ms>     RTT in ms.
+
+    --download <Bps>   Download rate in Bps
+
+    --upload <Bps>     Upload rate in Bps
+
+OPTIONS - DEVICE EMULATION
+
+    --emulate-device <device>
+
+
+OPTIONS - CONTENT INJECTION
+
+    --css <path|str>
+
+    --js <path|str>
+
+
 
     --debug            Verbose debugging mode.
 
