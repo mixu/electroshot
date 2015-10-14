@@ -20,7 +20,7 @@ module.exports = function(tasks) {
             height: task.size.height,
           }, done);
         } else {
-          targetWindow.capture(done);
+          targetWindow.capture(false, done);
         }
       });
     };

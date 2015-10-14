@@ -49,6 +49,18 @@ ipc.on('get-dimensions', function ensureRendered(selector) {
   });
 });
 
+ipc.on('get-content-dimensions', function() {
+  // We want to increase the height if needed, but not the width.
+  var body = document.body,
+      html = document.documentElement;
+  var height = Math.max( body.scrollHeight, body.offsetHeight,
+                         html.clientHeight, html.scrollHeight, html.offsetHeight );
+  ipc.send('return-content-dimensions', {
+    width: window.innerWidth,
+    height: height,
+  });
+});
+
 ipc.on('set-zoom-factor', function(factor) {
   console.log('set-zoom-factor', factor);
   webFrame.setZoomFactor(factor);

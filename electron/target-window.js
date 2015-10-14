@@ -37,7 +37,7 @@ TargetWindow.prototype.initialize = function(task, onDone) {
   }
 
   // width, height
-  this.window.setContentSize(task.size.width, task.size.height || 768);
+  this.window.setSize(task.size.width, task.size.height || 768);
 
   ipc.once('window-loaded', function() {
     console.log('IPC', 'window-loaded');
@@ -52,15 +52,36 @@ TargetWindow.prototype.initialize = function(task, onDone) {
 
     ipc.once('loaded', function() {
       console.log('IPC', 'loaded');
-      onDone();
+
+      if (task.size.height > 0) {
+        return onDone();
+      }
+      // ensure window is sized to full content ...
+      ipc.once('return-content-dimensions', function(event, dims) {
+        if (task.device) {
+          dims.height = dims.height / task.device.deviceScaleFactor;
+        }
+        if (dims.height > task.size.height) {
+          console.log('Increasing window size to ' + task.size.width + 'x' + dims.height);
+          self.window.setSize(task.size.width, dims.height);
+          // wait another 2 frames
+          ipc.once('loaded', function() {
+            onDone();
+          });
+          self.window.webContents.send('ensure-rendered', 0, 'loaded');
+          return;
+        }
+        onDone();
+      });
+      self.window.webContents.send('get-content-dimensions');
     });
     self.window.webContents.send('ensure-rendered', task.delay, 'loaded');
   });
 
   if (task.device) {
     // useful: set the size exactly (contentsize is not useful here)
-    this.window.setSize(task.size.width, task.size.height);
-    this.window.setMaximumSize(task.size.width, task.size.height);
+    this.window.setSize(task.device.screenSize.width, task.device.screenSize.height);
+    //this.window.setMaximumSize(task.device.screenSize.width, task.device.screenSize.height);
   }
 
 
@@ -119,8 +140,8 @@ TargetWindow.prototype.reset = function() {
     });
   }
   // reset network emulation
-  var hasNetworkEmulation = (typeof task.latency === 'number' ||
-      typeof task.download === 'number' || typeof task.upload === 'number');
+  var hasNetworkEmulation = (typeof this.task.latency === 'number' ||
+      typeof this.task.download === 'number' || typeof this.task.upload === 'number');
 
   if (hasNetworkEmulation) {
     self.window.webContents.session.disableNetworkEmulation();
@@ -137,7 +158,7 @@ TargetWindow.prototype.getDimensions = function(selector, onDone) {
 TargetWindow.prototype.capture = function(dims, onDone) {
   var self = this;
   var tries = 0;
-  var hasDims = arguments.length > 1;
+  var hasDims = arguments.length > 1 && dims;
   var task = this.task;
 
   function tryCapture(dims) {
@@ -153,9 +174,11 @@ TargetWindow.prototype.capture = function(dims, onDone) {
       console.log(data.isEmpty() ? 'Screenshot is empty, retrying' : 'Error: ' + err);
       tries++;
       if (tries > 5) {
-        return done(err);
+        return onDone(err);
       }
-      setTimeout(tryCapture, 100 * tries);
+      setTimeout(function() {
+        tryCapture(dims);
+      }, 100 * tries);
       return;
     }
 

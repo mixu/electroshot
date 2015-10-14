@@ -389,7 +389,6 @@ describe('args to tasks', function() {
           screenSize: { width: 375, height: 667 },
           viewPosition: { x: 0, y: 0 },
           offset: {x: 0, y: 0},
-          viewSize: { width: 375, height: 667 },
           deviceScaleFactor: 2,
           fitToView: false,
           scale: 1,
@@ -411,7 +410,6 @@ describe('args to tasks', function() {
           screenSize: { width: 375, height: 667 },
           viewPosition: { x: 0, y: 0 },
           offset: {x: 0, y: 0},
-          viewSize: { width: 375, height: 667 },
           deviceScaleFactor: 2,
           fitToView: false,
           scale: 1,
@@ -433,7 +431,6 @@ describe('args to tasks', function() {
           screenSize: { width: 667, height: 375 },
           viewPosition: { x: 0, y: 0 },
           offset: {x: 0, y: 0},
-          viewSize: { width: 667, height: 375 },
           deviceScaleFactor: 2,
           fitToView: false,
           scale: 1,
@@ -455,7 +452,6 @@ describe('args to tasks', function() {
           screenSize: { width: 667, height: 375 },
           viewPosition: { x: 0, y: 0 },
           offset: {x: 0, y: 0},
-          viewSize: { width: 667, height: 375 },
           deviceScaleFactor: 2,
           fitToView: false,
           scale: 1,
@@ -477,7 +473,6 @@ describe('args to tasks', function() {
           screenSize: { width: 667, height: 375 },
           viewPosition: { x: 0, y: 0 },
           offset: {x: 0, y: 0},
-          viewSize: { width: 667, height: 375 },
           deviceScaleFactor: 2,
           fitToView: false,
           scale: 1,
@@ -545,9 +540,14 @@ describe('args to tasks', function() {
 
   // good looking messages V Generated 3 screenshots from 2 urls
 
-  // options:
+  // --format pdf
+  //   --pdf-margin default|none|minimum
+  //   --pdf-page-size A4|A3|Legal|Letter|Tabloid
+  //   --pdf-background true|false
+  //   --pdf-orientation landscape|portrait
+
+
+  // Later:
   // --delay name of callback
   // --filename <template>
-
-
 });

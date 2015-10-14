@@ -185,6 +185,8 @@ describe('integration tests', function() {
 
   it('accepts --stdin-html + html');
 
+  // Workaround for https://github.com/atom/electron/issues/2610
+
   describe('errors', function() {
 
     it('exits with the right error code');
