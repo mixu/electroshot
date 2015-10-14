@@ -1,5 +1,6 @@
 var fs = require('fs'),
     path = require('path'),
+    http = require('http'),
     crypto = require('crypto'),
     assert = require('assert'),
     spawn = require('child_process').spawn;
@@ -49,7 +50,9 @@ describe('integration tests', function() {
   it('can delay for a specific interval', function(done) {
     this.timeout(5000);
     var tmpDir = fixture.dirname();
-    run([__dirname + '/fixtures/interval.html', '100x100', '--out', tmpDir, '--delay', '1000' ], process.cwd(), function() {
+    run([
+      __dirname + '/fixtures/interval.html', '100x100', '--out', tmpDir, '--delay', '1000'
+    ], process.cwd(), function() {
       assert.ok([
         '46ead2a024bd27574d6ba36f0b47d793',
         '8875084a1f14c512aaf3310917016ddb', // OSX (2x)
@@ -61,16 +64,20 @@ describe('integration tests', function() {
   it('can screenshot a specific element', function(done) {
     this.timeout(10000);
     var tmpDir = fixture.dirname();
-    run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--selector', '#one' ], process.cwd(), function() {
+    run([
+      __dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--selector', '#one'
+    ], process.cwd(), function() {
       assert.ok([
         '2f4358ac1b145b71c984abc40a3306f3',
         'f7edb2bf6d64146ba7c0286144e71a75', // OSX (2x)
-        ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
-      run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--selector', '.two' ], process.cwd(), function() {
+      ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
+      run([
+        __dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--selector', '.two'
+      ], process.cwd(), function() {
         assert.ok([
           'd66cec58520cb2b391354b08c0e802c8',
           '36e8405b5c031e412f3fbe669037dee3', // OSX (2x)
-          ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
+        ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1);
         done();
       });
     });
@@ -110,7 +117,9 @@ describe('integration tests', function() {
   it('can set a Chrome flag', function(done) {
     this.timeout(5000);
     var tmpDir = fixture.dirname();
-    run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--force-device-scale-factor', 2], process.cwd(), function() {
+    run([
+      __dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--force-device-scale-factor', 2
+    ], process.cwd(), function() {
       assert.ok([
         'bae69b8086212675c19dfdbba2c84eeb',
         '03bf106d36c7d05c029347762dbab688', // OSX (2x)
@@ -122,7 +131,9 @@ describe('integration tests', function() {
   it('can produce a jpg image', function(done) {
     this.timeout(5000);
     var tmpDir = fixture.dirname();
-    run([__dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--format', 'jpg', '--quality', '85'], process.cwd(), function() {
+    run([
+      __dirname + '/fixtures/selector.html', '100x100', '--out', tmpDir, '--format', 'jpg', '--quality', '85'
+    ], process.cwd(), function() {
       // console.log(tmpDir);
       assert.ok([
         'd23a7483bfc2010d8ac15793620b98d4',
@@ -133,12 +144,48 @@ describe('integration tests', function() {
   });
 
   it('can set a custom user agent string', function(done) {
+    var tmpDir = fixture.dirname();
+    var assertions = 0;
+    var server = http.createServer(function(req, res) {
+      assert.equal(req.headers['user-agent'], 'some-user-agent');
+      assertions++;
+      res.end('<html></html>');
+    }).listen(3000, function() {
+      run([
+        'http://localhost:3000/', '100x100', '--out', tmpDir, '--user-agent', 'some-user-agent'
+      ], process.cwd(), function() {
+        assert.equal(assertions, 1);
+        server.close(done);
+      });
+    });
+  });
+
+  it('can set a cookie', function(done) {
+    var tmpDir = fixture.dirname();
+    var assertions = 0;
+    var rand = Math.random().toString(36).substring(2);
+    var server = http.createServer(function(req, res) {
+      assert.equal(req.headers.cookie, 'priority=' + rand);
+      assertions++;
+      res.end('<html></html>');
+    }).listen(3000, function() {
+      run([
+        'http://localhost:3000/', '100x100', '--out', tmpDir, '--cookie',
+        'priority=' + rand +'; expires=Wed, 29 Jan 2014 17:43:25 GMT; Path=/'
+      ], process.cwd(), function() {
+        assert.equal(assertions, 1);
+        server.close(done);
+      });
+    });
+  });
+
+  it('can produce an image that matches a device profile', function() {
 
   });
 
-
-
   describe('errors', function() {
+
+    it('exits with the right error code');
 
     it('warns when called with no params', function() {
 

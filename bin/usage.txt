@@ -1,6 +1,6 @@
 USAGE
 
-    shot [options] [url(s)] [resolution(s)]
+    shot [options] [url(s)] [resolution(s)|device(s)]
 
 URL EXAMPLES
 
@@ -10,13 +10,25 @@ URL EXAMPLES
     ./some/file.html   Captures a local files by mounting `./some` under localhost using a HTTP server,
     /some/file.html    and then requesting `/file.html`.
 
-RESOLUTION EXAMPLES
+RESOLUTION / DEVICE EXAMPLES
 
     1024x768           Captures a screenshot which is cropped to 1024px width and 768px height.
 
     1024x              Captures a screenshot which is 1024px wide, and as tall needed for the page.
 
     1024               Same as above.
+
+    "Apple iPhone 6"   Captures a screenshot which is as wide as a vertical iPhone 6 and as tall as needed,
+                       with device pixel resolution and pixel ratio emulation
+                       (e.g. CSS / JS screen dimension queries work).
+
+    "horizontal Apple iPhone 6"   Captures a screenshot which is as wide as a horizontal iPhone 6,
+                                  and as tall as needed, with device pixel resolution emulation
+
+    "cropped Apple iPhone 6"  Captures a screenshot which is as wide and tall as a single screen on
+                              a vertical iPhone 6.
+
+    "cropped horizontal Apple iPhone 6"  Both cropped and horizontal.
 
 OPTIONS - CAPTURE
 
@@ -34,6 +46,11 @@ OPTIONS - CAPTURE
 
     --zoom-factor <n>  The default zoom factor of the page; e.g. 1.0 represents 100% and 3.0 represents 300%.
 
+OPTIONS - HTTP
+
+    --user-agent <string>  Sets a custom user agent string.
+
+    --cookie <cookie>  Sets a custom cookie. Can be set multiple times.
 
 OPTIONS - SERVER
 
@@ -77,9 +94,6 @@ TODO
 
     file://...         Captures a local file by loading the file URL directly, without a static file server.
 
-    --user-agent <string>  Sets a custom user agent string.
-
-    --cookie <cookie>  Sets a custom cookie. Can be set multiple times.
 
 OPTIONS - NETWORK EMULATION
 
@@ -90,10 +104,6 @@ OPTIONS - NETWORK EMULATION
     --download <Bps>   Download rate in Bps
 
     --upload <Bps>     Upload rate in Bps
-
-OPTIONS - DEVICE EMULATION
-
-    --emulate-device <device>
 
 
 OPTIONS - CONTENT INJECTION

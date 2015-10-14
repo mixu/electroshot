@@ -7,16 +7,7 @@ module.exports = function(tasks) {
     return function(done) {
       console.log(task);
 
-      targetWindow.initialize({
-        width: task.size.width,
-        height: task.size.height || 768,
-        url: task.url,
-        out: task.out,
-        format: task.format,
-        quality: task.quality,
-        delay: task.delay,
-        'zoom-factor': task['zoom-factor'],
-      }, function() {
+      targetWindow.initialize(task, function() {
         if (task.selector) {
           targetWindow.getDimensions(task.selector, function(dims) {
             targetWindow.capture(dims, done);

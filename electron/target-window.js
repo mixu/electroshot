@@ -10,9 +10,9 @@ function TargetWindow() {
 }
 
 // sync initialization
-TargetWindow.prototype.initialize = function(opts, onDone) {
+TargetWindow.prototype.initialize = function(task, onDone) {
   var self = this;
-  this.opts = opts;
+  this.task = task;
   if (!this.window) {
     this.window = new BrowserWindow({
       show: true,
@@ -37,7 +37,7 @@ TargetWindow.prototype.initialize = function(opts, onDone) {
   }
 
   // width, height
-  this.window.setContentSize(opts.width, opts.height);
+  this.window.setContentSize(task.size.width, task.size.height || 768);
 
   ipc.once('window-loaded', function() {
     console.log('IPC', 'window-loaded');
@@ -45,49 +45,64 @@ TargetWindow.prototype.initialize = function(opts, onDone) {
 
     // webContents configuration
     // - zoom factor
-    if (opts['zoom-factor'] !== 1) {
-      console.log('SEND', 'set-zoom-factor', opts['zoom-factor']);
-      self.window.webContents.send('set-zoom-factor', opts['zoom-factor']);
+    if (task['zoom-factor'] !== 1) {
+      console.log('SEND', 'set-zoom-factor', task['zoom-factor']);
+      self.window.webContents.send('set-zoom-factor', task['zoom-factor']);
     }
 
     ipc.once('loaded', function() {
       console.log('IPC', 'loaded');
       onDone();
     });
-    self.window.webContents.send('ensure-rendered', opts.delay, 'loaded');
+    self.window.webContents.send('ensure-rendered', task.delay, 'loaded');
   });
 
-  this.window.setContentSize(375, 627);
-  // useful: set the size exactly (contentsize is not useful here)
-  this.window.setSize(375, 627);
-  this.window.setMaximumSize(627, 627);
+  if (task.device) {
+    // useful: set the size exactly (contentsize is not useful here)
+    this.window.setSize(task.size.width, task.size.height);
+    this.window.setMaximumSize(task.size.width, task.size.height);
+  }
 
-  this.window.loadUrl(opts.url, {
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4'
-  });
+
+  this.window.loadUrl(task.url, task['user-agent'] !== '' ? { userAgent: task['user-agent'] } : {});
   // this happens before the page starts executing
-  self.window.webContents.enableDeviceEmulation({
-    screenPosition: 'mobile',
-    screenSize:  { width: 375, height: 627 },
-    viewPosition: { x: 0, y: 0 },
-    offset: {x: 0, y: 0},
-    viewSize: { width: 375, height: 627 },
-    deviceScaleFactor: 2,
-    fitToView: false,
-    scale: 1,
-  });
+  if (task.device) {
+    this.window.webContents.enableDeviceEmulation(task.device);
+  }
+
+  if (task.cookies) {
+    // TODO wait
+    task.cookies.forEach(function(cookie) {
+      console.log('Set cookie', cookie);
+      self.window.webContents.session.cookies.set(cookie, function(err) {
+        if (err) {
+          console.log('ERR Set cookie', cookie, err);
+        }
+      });
+    });
+  }
 
   // to work around https://github.com/atom/electron/issues/1580
   this.window.webContents.executeJavaScript(fs.readFileSync(path.resolve(__dirname + '/preload.js'), 'utf8'));
-
 };
 
 TargetWindow.prototype.reset = function() {
+  var self = this;
   // reset zoom
-  if (this.opts['zoom-factor'] !== 1) {
+  if (this.task['zoom-factor'] !== 1) {
     this.window.webContents.send('set-zoom-factor', 1);
   }
   // reset deviceEmulation
+  if (this.task.device) {
+    this.window.webContents.disableDeviceEmulation();
+  }
+  // reset cookies
+  if (this.task.cookies) {
+    // TODO wait
+    this.task.cookies.forEach(function(cookie) {
+      self.window.webContents.session.cookies.remove(cookie, function() {});
+    });
+  }
 };
 
 TargetWindow.prototype.getDimensions = function(selector, onDone) {
@@ -101,7 +116,7 @@ TargetWindow.prototype.capture = function(dims, onDone) {
   var self = this;
   var tries = 0;
   var hasDims = arguments.length > 1;
-  var opts = this.opts;
+  var task = this.task;
 
   function tryCapture(dims) {
     if (hasDims) {
@@ -122,8 +137,8 @@ TargetWindow.prototype.capture = function(dims, onDone) {
       return;
     }
 
-    console.log('write screenshot', opts.out);
-    fs.writeFile(opts.out, (opts.format === 'png' ? data.toPng() : data.toJpeg(opts.quality)));
+    console.log('write screenshot', task.out);
+    fs.writeFile(task.out, (task.format === 'png' ? data.toPng() : data.toJpeg(task.quality)));
     self.reset();
     onDone();
   }

@@ -17,14 +17,13 @@ function waitFor(num, onDone) {
 }
 ipc.on('ensure-rendered', function ensureRendered(delay, eventName) {
   console.log('RECEIVE', 'ensure-rendered');
-
   try {
     var style = document.createElement('style');
     // WebKit hack :(
     style.appendChild(document.createTextNode(''));
     document.head.appendChild(style);
     style.sheet.insertRule('::-webkit-scrollbar { display: none; }');
-  } catch(e) {}
+  } catch (e) {}
 
   waitFor(delay, function() {
     console.log('SEND', eventName);
@@ -34,9 +33,10 @@ ipc.on('ensure-rendered', function ensureRendered(delay, eventName) {
 
 ipc.on('get-dimensions', function ensureRendered(selector) {
   console.log('get-dimensions', selector);
+  var result;
   try {
-   var result = document.querySelector(selector).getBoundingClientRect();
-  } catch(e) {
+   result = document.querySelector(selector).getBoundingClientRect();
+  } catch (e) {
     console.error('Could not find target ' + selector, e);
     ipc.send('return-dimensions', false);
     return;

@@ -15,12 +15,14 @@
   "dependencies": {
     "chromium-emulated-devices": "~1.0.0",
     "chromium-emulated-networks": "~1.0.0",
+    "cookie": "~0.2.2",
     "electron-prebuilt": "~0.33.6",
     "express": "~4.13.3",
     "file-fixture": "0.0.2",
     "miniq": "~1.0.0",
     "sanitize-filename": "~1.4.4",
     "subarg": "~1.0.0",
+    "tough-cookie": "~2.2.0",
     "xtend": "~4.0.0"
   }
 }

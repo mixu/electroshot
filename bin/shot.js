@@ -17,7 +17,7 @@ var defaultOptions = require('../lib/default-options.js'),
 var argv = xtend({}, defaultOptions, subarg(process.argv.slice(2)));
 
 if (argv.v || argv.version) {
-  console.log('shot v'+ require('../package.json').version);
+  console.log('shot v' + require('../package.json').version);
   spawn(electron, [__dirname + '/../electron/index.js', '--version'], { stdio: 'inherit' });
   return;
 }
@@ -62,7 +62,7 @@ if (pairs.length > 0) {
   pairs.forEach(function(pair) {
     app.use(pair[0], express.static(pair[1]));
   });
-  server = app.listen(argv.port, function () {
+  server = app.listen(argv.port, function() {
     console.log('Express server listening at ' + baseUrl);
     runElectron();
   });
@@ -78,7 +78,7 @@ function runElectron() {
     return typeof defaultOptions[key] === 'undefined' && key !== '_';
   }).reduce(function(all, key) {
     if (typeof argv[key] !== 'boolean') {
-      return all.concat([ '--' + key,  argv[key] ]);
+      return all.concat(['--' + key, argv[key]]);
     } else {
       return all.concat('--' + (argv[key] ? 'no-' : '') + key);
     }
@@ -91,7 +91,7 @@ function runElectron() {
 
   child.stdin.end(JSON.stringify(tasks));
 
-  child.on('close', function (code) {
+  child.on('close', function(code) {
     console.log('Electron exited');
     if (server) {
       server.close();

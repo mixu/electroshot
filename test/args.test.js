@@ -1,6 +1,7 @@
 var assert = require('assert');
 var argsToTasks = require('../lib/args-to-tasks.js');
 var fixture = require('file-fixture');
+var Cookie = require('tough-cookie').Cookie;
 
 var oldArgsToTasks = argsToTasks;
 argsToTasks = function(args) {
@@ -11,6 +12,12 @@ argsToTasks = function(args) {
     }
     if (task['zoom-factor'] === 1) {
       delete task['zoom-factor'];
+    }
+    if (task['user-agent'] === '') {
+      delete task['user-agent'];
+    }
+    if (task['cookie'] === '') {
+      delete task['cookie'];
     }
     if (!task.selector) {
       delete task.selector;
@@ -95,7 +102,9 @@ describe('args to tasks', function() {
   });
 
   it('accepts --out <path> <url> <url> <resolution>', function() {
-    assert.deepEqual(argsToTasks(['--out', '/foo', 'http://google.com', 'http://gmail.com', '1024x768']), [
+    assert.deepEqual(argsToTasks([
+      '--out', '/foo', 'http://google.com', 'http://gmail.com', '1024x768'
+    ]), [
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
@@ -110,7 +119,7 @@ describe('args to tasks', function() {
   });
 
   it('accepts grouped arguments', function() {
-    assert.deepEqual(argsToTasks([ '[', 'http://google.com', '1024x768', ']']), [
+    assert.deepEqual(argsToTasks(['[', 'http://google.com', '1024x768', ']']), [
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
@@ -154,7 +163,9 @@ describe('args to tasks', function() {
   });
 
   it('can override flags in groups', function() {
-    assert.deepEqual(argsToTasks([ '--out', '/foo', '[', 'http://google.com', '1024x768', '--out', '/bar', ']']), [
+    assert.deepEqual(argsToTasks([
+      '--out', '/foo', '[', 'http://google.com', '1024x768', '--out', '/bar', ']'
+    ]), [
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
@@ -311,37 +322,185 @@ describe('args to tasks', function() {
     ]);
   });
 
-  it('accepts --emulate-device <device>', function() {
-    assert.deepEqual(argsToTasks(['--emulate-device', 'Apple iPhone 6', 'http://google.com']), [
+  it('accepts --user-agent <str> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--user-agent', 'Foo', 'http://google.com', '1024x768']), [
       {
         url: 'http://google.com/',
-        size: { width: 375, height: 667 },
-        out: process.cwd() + '/google.com-1024x768.jpg',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        'emulate-device': {
-          screenPosition: 'mobile',
-          viewSize: { width: 375, height: 667 },
-          deviceScaleFactor: 2,
-        },
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        'user-agent': 'Foo',
       }
     ]);
-    assert.deepEqual(argsToTasks(['--emulate-device', 'horizontal Apple iPhone 6', 'http://google.com']), [
+  });
+
+  it('accepts --cookie <str> <url> <resolution>', function() {
+    var result = argsToTasks([
+      '--cookie', 'priority=true; expires=Wed, 29 Jan 2014 17:43:25 GMT; Path=/',
+      'http://google.com', '1024x768'
+    ]);
+    var c = result[0].cookies[0];
+    assert.equal(new Cookie({
+        key: c.name,
+        value: c.value,
+        domain: c.domain,
+        path: c.path,
+        secure: c.secure,
+        httpOnly: c.session,
+      }).toString(),
+      'priority=true; Domain=google.com; Path=/');
+    assert.deepEqual(result, [
       {
         url: 'http://google.com/',
-        size: { width: 667, height: 375 },
-        out: process.cwd() + '/google.com-1024x768.jpg',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        'emulate-device': {
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        cookies: [
+          { url: 'http://google.com/',
+            name: 'priority',
+            value: 'true',
+            domain: 'google.com',
+            path: '/',
+            secure: false,
+            session: false,
+          }
+        ]
+      }
+    ]);
+  });
+
+  it('accepts <url> <device>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', 'Apple iPhone 6']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 375, height: 0 },
+        out: process.cwd() + '/google.com-apple-iphone-6.png',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
+        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        device: {
           screenPosition: 'mobile',
-          viewSize: { width: 667, height: 375 },
+          screenSize: { width: 375, height: 667 },
+          viewPosition: { x: 0, y: 0 },
+          offset: {x: 0, y: 0},
+          viewSize: { width: 375, height: 667 },
           deviceScaleFactor: 2,
+          fitToView: false,
+          scale: 1,
         },
       }
     ]);
   });
 
+  it('accepts <url> <cropped device>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', 'cropped Apple iPhone 6']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 375, height: 667 },
+        out: process.cwd() + '/google.com-cropped-apple-iphone-6.png',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
+        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        device: {
+          screenPosition: 'mobile',
+          screenSize: { width: 375, height: 667 },
+          viewPosition: { x: 0, y: 0 },
+          offset: {x: 0, y: 0},
+          viewSize: { width: 375, height: 667 },
+          deviceScaleFactor: 2,
+          fitToView: false,
+          scale: 1,
+        },
+      }
+    ]);
+  });
 
-  // --format <png | jpg> (--quality)
+  it('accepts <url> <horizontal device>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', 'horizontal Apple iPhone 6']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 667, height: 0 },
+        out: process.cwd() + '/google.com-horizontal-apple-iphone-6.png',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
+        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        device: {
+          screenPosition: 'mobile',
+          screenSize: { width: 667, height: 375 },
+          viewPosition: { x: 0, y: 0 },
+          offset: {x: 0, y: 0},
+          viewSize: { width: 667, height: 375 },
+          deviceScaleFactor: 2,
+          fitToView: false,
+          scale: 1,
+        },
+      }
+    ]);
+  });
+
+  it('accepts <url> <cropped horizontal device>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', 'cropped horizontal Apple iPhone 6']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 667, height: 375 },
+        out: process.cwd() + '/google.com-cropped-horizontal-apple-iphone-6.png',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
+        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        device: {
+          screenPosition: 'mobile',
+          screenSize: { width: 667, height: 375 },
+          viewPosition: { x: 0, y: 0 },
+          offset: {x: 0, y: 0},
+          viewSize: { width: 667, height: 375 },
+          deviceScaleFactor: 2,
+          fitToView: false,
+          scale: 1,
+        },
+      }
+    ]);
+  });
+
+  it('accepts <url> <horizontal cropped device>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', 'horizontal cropped Apple iPhone 6']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 667, height: 375 },
+        out: process.cwd() + '/google.com-horizontal-cropped-apple-iphone-6.png',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
+        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
+        device: {
+          screenPosition: 'mobile',
+          screenSize: { width: 667, height: 375 },
+          viewPosition: { x: 0, y: 0 },
+          offset: {x: 0, y: 0},
+          viewSize: { width: 667, height: 375 },
+          deviceScaleFactor: 2,
+          fitToView: false,
+          scale: 1,
+        },
+      }
+    ]);
+  });
+
+  it('accepts multiple --delay(s)');
+
+  it('accepts a file:// url');
+
+  it('accepts --emulate-network <profile>');
+
+  it('accepts --latency <ms>');
+
+  it('accepts --download <Bps>');
+
+  it('accepts --upload <Bps>');
+
+  it('accepts --js <str>');
+  it('accepts --js <path>');
+  it('accepts --js <str> --js <str>');
+  it('accepts --css <str>');
+  it('accepts --css <path>');
+  it('accepts --css <str> --css <str>');
+
+  it('accepts --max-wait <ms>');
+  it('accepts --debug');
+
+  it('accepts --device <json>');
+
   // Capture strings of HTML
   //   --stdin-html
   // smart filenames
