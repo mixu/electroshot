@@ -58,9 +58,6 @@ TargetWindow.prototype.initialize = function(task, onDone) {
       }
       // ensure window is sized to full content ...
       ipc.once('return-content-dimensions', function(event, dims) {
-        if (task.device) {
-          dims.height = dims.height / task.device.deviceScaleFactor;
-        }
         if (dims.height > task.size.height) {
           console.log('Increasing window size to ' + task.size.width + 'x' + dims.height);
           self.window.setSize(task.size.width, dims.height);

@@ -18,17 +18,19 @@ RESOLUTION / DEVICE EXAMPLES
 
     1024               Same as above.
 
-    "Apple iPhone 6"   Captures a screenshot which is as wide as a vertical iPhone 6 and as tall as needed,
+    "iPhone 6"   Captures a screenshot which is as wide as a vertical iPhone 6 and as tall as needed,
                        with device pixel resolution and pixel ratio emulation
                        (e.g. CSS / JS screen dimension queries work).
 
-    "horizontal Apple iPhone 6"   Captures a screenshot which is as wide as a horizontal iPhone 6,
+    "horizontal iPhone 6"   Captures a screenshot which is as wide as a horizontal iPhone 6,
                                   and as tall as needed, with device pixel resolution emulation
 
-    "cropped Apple iPhone 6"  Captures a screenshot which is as wide and tall as a single screen on
+    "cropped iPhone 6"  Captures a screenshot which is as wide and tall as a single screen on
                               a vertical iPhone 6.
 
-    "cropped horizontal Apple iPhone 6"  Both cropped and horizontal.
+    "cropped horizontal iPhone 6"  Both cropped and horizontal.
+
+    "iPhone 6"x1000   Captures a screenshot which is as wide as a vertical iPhone 6, and 1000px tall.
 
 OPTIONS - CAPTURE
 

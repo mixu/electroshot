@@ -1,4 +1,5 @@
 var assert = require('assert');
+var xtend = require('xtend');
 var argsToTasks = require('../lib/args-to-tasks.js');
 var fixture = require('file-fixture');
 var Cookie = require('tough-cookie').Cookie;
@@ -376,9 +377,7 @@ describe('args to tasks', function() {
     ]);
   });
 
-  it('accepts <url> <device>', function() {
-    assert.deepEqual(argsToTasks(['http://google.com', 'Apple iPhone 6']), [
-      {
+  var appleExpected = {
         url: 'http://google.com/',
         size: { width: 375, height: 0 },
         out: process.cwd() + '/google.com-apple-iphone-6.png',
@@ -393,28 +392,29 @@ describe('args to tasks', function() {
           fitToView: false,
           scale: 1,
         },
-      }
+      };
+
+  it('accepts <url> <device>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', 'Apple iPhone 6']), [
+      appleExpected
+    ]);
+    assert.deepEqual(argsToTasks(['http://google.com', 'iPhone 6']), [
+      xtend({}, appleExpected, { out: process.cwd() + '/google.com-iphone-6.png' })
     ]);
   });
 
   it('accepts <url> <cropped device>', function() {
     assert.deepEqual(argsToTasks(['http://google.com', 'cropped Apple iPhone 6']), [
-      {
-        url: 'http://google.com/',
-        size: { width: 375, height: 667 },
+      xtend({}, appleExpected, {
         out: process.cwd() + '/google.com-cropped-apple-iphone-6.png',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
-        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        device: {
-          screenPosition: 'mobile',
-          screenSize: { width: 375, height: 667 },
-          viewPosition: { x: 0, y: 0 },
-          offset: {x: 0, y: 0},
-          deviceScaleFactor: 2,
-          fitToView: false,
-          scale: 1,
-        },
-      }
+        size: { width: 375, height: 667 },
+      })
+    ]);
+    assert.deepEqual(argsToTasks(['http://google.com', 'cropped iPhone 6']), [
+      xtend({}, appleExpected, {
+        out: process.cwd() + '/google.com-cropped-iphone-6.png',
+        size: { width: 375, height: 667 },
+      })
     ]);
   });
 
@@ -537,6 +537,9 @@ describe('args to tasks', function() {
   // for specific file names
 
   // --parallel <n> (num windows)
+
+  // Exclude company names:
+  // e.g. iPhone 6 => Apple iPhone 6
 
   // good looking messages V Generated 3 screenshots from 2 urls
 
