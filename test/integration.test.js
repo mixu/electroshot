@@ -183,6 +183,8 @@ describe('integration tests', function() {
 
   });
 
+  it('accepts --stdin-html + html');
+
   describe('errors', function() {
 
     it('exits with the right error code');

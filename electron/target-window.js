@@ -82,6 +82,21 @@ TargetWindow.prototype.initialize = function(task, onDone) {
     });
   }
 
+  var has = {
+    latency: typeof task.latency === 'number',
+    download: typeof task.download === 'number',
+    upload: typeof task.upload === 'number',
+  };
+
+  if (has.latency || has.download || has.upload) {
+    // when not set, default to "WiFi" profile
+    self.window.webContents.session.enableNetworkEmulation({
+      latency: has.latency ? task.latency : 2,
+      downloadThroughput: has.download ? task.download : 3932160,
+      uploadThroughput: has.upload ? task.upload : 3932160
+    });
+  }
+
   // to work around https://github.com/atom/electron/issues/1580
   this.window.webContents.executeJavaScript(fs.readFileSync(path.resolve(__dirname + '/preload.js'), 'utf8'));
 };
@@ -102,6 +117,13 @@ TargetWindow.prototype.reset = function() {
     this.task.cookies.forEach(function(cookie) {
       self.window.webContents.session.cookies.remove(cookie, function() {});
     });
+  }
+  // reset network emulation
+  var hasNetworkEmulation = (typeof task.latency === 'number' ||
+      typeof task.download === 'number' || typeof task.upload === 'number');
+
+  if (hasNetworkEmulation) {
+    self.window.webContents.session.disableNetworkEmulation();
   }
 };
 

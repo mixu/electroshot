@@ -106,6 +106,10 @@ See: https://github.com/atom/electron/issues/228
 
 ## Device and network emulation
 
+Test site: http://speedof.me/
+
+Test site: http://www.mydevice.io/
+
 latency Double - RTT in ms
 downloadThroughput Double - Download rate in Bps
 uploadThroughput Double - Upload rate in Bps
@@ -139,17 +143,15 @@ enableDeviceEmulation: https://github.com/atom/electron/blob/master/docs/api/web
 
 enableNetworkEmulation: https://github.com/atom/electron/blob/master/docs/api/session.md#sessionenablenetworkemulationoptions
 
+## API
+
+- resolve args
+- resolve mountpoints
+- run server
+- run electron
 
 # nonfeatures
 
-  - cropping a specific region and/or offset ({top}x{left}x{width}x{height} on CLI)
-  - transparent bg or color
-- HTTP options
-  - CURL-like:
-    - https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/devtools/front_end/network/NetworkLogView.js&q=_generateCurlCommand&sq=package:chromium&type=cs&l=1725
-    - custom headers
-    - basic auth
-  - custom behavior on different HTTP codes
 - thumbnails / montage
 - diffing: https://github.com/Huddle/Resemble.js
   - test suite definitions (mocha compatible assertions)
@@ -166,6 +168,3 @@ enableNetworkEmulation: https://github.com/atom/electron/blob/master/docs/api/se
     - www_google_com_1024x768.jpeg
     - www_google_com_768x1024.jpeg
     - www_google_com_1280x768.jpeg
-- streaming API
-  - chainable
-  - request-like .defaults

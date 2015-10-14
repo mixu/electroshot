@@ -65,6 +65,12 @@ OPTIONS - NETWORK EMULATION
 
     --list-network-conditions  Show the list of known network condition presets.
 
+    --latency <ms>     RTT in ms.
+
+    --download <Bps>   Download rate in Bps
+
+    --upload <Bps>     Upload rate in Bps
+
 OPTIONS - DEVICE EMULATION
 
     --list-devices     Show the list of known devices to emulate.
@@ -98,13 +104,6 @@ TODO
 OPTIONS - NETWORK EMULATION
 
     --emulate-network  <profile>
-
-    --latency <ms>     RTT in ms.
-
-    --download <Bps>   Download rate in Bps
-
-    --upload <Bps>     Upload rate in Bps
-
 
 OPTIONS - CONTENT INJECTION
 

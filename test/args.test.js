@@ -19,6 +19,15 @@ argsToTasks = function(args) {
     if (task['cookie'] === '') {
       delete task['cookie'];
     }
+    if (!task.upload) {
+      delete task.upload;
+    }
+    if (!task.download) {
+      delete task.download;
+    }
+    if (!task.latency) {
+      delete task.latency;
+    }
     if (!task.selector) {
       delete task.selector;
     }
@@ -477,17 +486,44 @@ describe('args to tasks', function() {
     ]);
   });
 
-  it('accepts multiple --delay(s)');
+  it('accepts --latency <ms> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--latency', '2', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        latency: 2,
+      }
+    ]);
+  });
 
-  it('accepts a file:// url');
+  it('accepts --download <bps> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--download', '2', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        download: 2,
+      }
+    ]);
+  });
+
+  it('accepts --upload <bps> <url> <resolution>', function() {
+    assert.deepEqual(argsToTasks(['--upload', '2', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        upload: 2,
+      }
+    ]);
+  });
 
   it('accepts --emulate-network <profile>');
 
-  it('accepts --latency <ms>');
+  it('accepts multiple --delay(s)');
 
-  it('accepts --download <Bps>');
-
-  it('accepts --upload <Bps>');
+  it('accepts a file:// url');
 
   it('accepts --js <str>');
   it('accepts --js <path>');
@@ -498,38 +534,20 @@ describe('args to tasks', function() {
 
   it('accepts --max-wait <ms>');
   it('accepts --debug');
+  // --debug (pop open electron window, verbose logging)
 
   it('accepts --device <json>');
 
-  // Capture strings of HTML
-  //   --stdin-html
-  // smart filenames
+  it('accepts a file path option');
+  // for specific file names
+
+  // --parallel <n> (num windows)
+
   // good looking messages V Generated 3 screenshots from 2 urls
-
-
-  // when given multiple pages on the same domain (??): use the full path + qs
-  // -> https://github.com/sindresorhus/filenamify-url
 
   // options:
   // --delay name of callback
   // --filename <template>
-  // --keywords (http://viewportsizes.com/)
-  // maybe not:
-  // --hide
-  // other actions on elements ? custom script??
-  // --debug (pop open electron window, verbose logging)
-  // --parallel <n> (num windows)
-  // Remap --crop ???
-
-  // cool:
-  // - tiling (montage) use case
-  // - diffing
-
-  // web options:
-  // - cookies, headers, http auth, userAgent
-  // - ignore ssl errors (?)
-  // - pipe in content (?)
 
 
-  // special format strings
 });
