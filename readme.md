@@ -1,6 +1,6 @@
 # electroshot
 
-Capture website screenshots (with web fonts!) using Electron.
+Capture website screenshots with optional device and network emulation as jpg, png or pdf (with web fonts!) using Electron / Chrome.
 
 # Features
 
@@ -57,8 +57,19 @@ If you want to, you can use the `file://` protocol by prefixing all your paths w
 You can group arguments with square brackets:
 
 ```
-
-
+cases:
+- set a full output path for each file
+  - single file
+     input: <url> <resolution> <path>
+  - many files
+     input: <url> <url> <resolution> <path> <path>
+     input: <url> <resolution> <path> <url> <resolution> <path>
+     input: [  <url> <resolution> <path> ] [ <url> <resolution> <path> ] <--- this
+- set a output path but use auto filenames for each file
+  - single file
+     input: --out <path> <url> <resolution>
+  - many files
+     input: --out <path> <url> <url> <resolution>
 ```
 
 ## Capture options
@@ -85,8 +96,27 @@ landscape Boolean - true for landscape, false for portrait.
 
 ## File names
 
+You can explicitly set the full path for each screenshot using `--filename <path>`. Relative paths in file names are relative to `--out`, full paths are preserved as-is.
 
+You can also use the following tokens to specify a template for filenames. The default template is `{name}-{size}.{format}`; if you set a `--delay`, it is `{name}-{size}-at-{delay}ms.{format}`.
 
+- `{crop}`: `-cropped` if the height is not set
+- `{date}`: a date like `2015-10-21`
+- `{time}`: a time like `17:00:50`
+- `{delay}`: the `--delay` value used for the screenshot (`''` if 0)
+- `{name}`:
+  - for http/https urls, this is a filename-safe version of the URL (no protocol), e.g.
+    - `google.com` -> `google.com`
+    - `https://github.com/mixu/gr#features?foo=bar` -> `github.com-mixu-gr-features-foo-bar`
+  - for local files:
+    - when there is a single target, this is the filename without an extenstion e.g. `/foo/bar/index.html` -> `index`
+    - when there are multiple targets, this the full path to the file, excluding  any shared extensions and paths, e.g. `/foo/bar/index.html`, `/foo/baz/index.html` -> `bar-index`, `baz-index`
+- `{size}`: if a device is emulated, this is the name of device (e.g. `iphone-6`); otherwise this is equivalent to `{width}x{height}`.
+- `{width}`: the current width, e.g. `1024`
+- `{height}`: the current height, e.g. `768`
+- `{format}`: `.png` or `.jpg`
+
+If the generated filenames are not unique, a number will be appended to the paths, e.g. `foo.com-1024x768-1.png` and `foo.com-1024x768-2.png`.
 
 ## Capturing using an headless server / vagrant / docker
 

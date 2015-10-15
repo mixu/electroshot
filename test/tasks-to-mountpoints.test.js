@@ -14,7 +14,7 @@ describe('paths to localhost', function() {
 
   it('given a dir, it mounts the dir by default', function() {
     var tasks = [
-      { url: 'file://' + tmpDir + '/some-folder' }
+      { url: tmpDir + '/some-folder' }
     ];
     assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir + '/some-folder']
@@ -26,11 +26,11 @@ describe('paths to localhost', function() {
 
   it('given a file, it mounts the file by default; handles duplicates and nonexistent', function() {
     var tasks = [
-      { url: 'file://' + tmpDir + '/some-folder/index.html' },
-      { url: 'file://' + tmpDir + '/some-folder/foo.html' },
-      { url: 'file://' + tmpDir + '/some-folder/nonexistent.html' },
-      { url: 'file://' + tmpDir + '/other.html' },
-      { url: 'file://' + tmpDir + '/other-folder/index.html' },
+      { url: tmpDir + '/some-folder/index.html' },
+      { url: tmpDir + '/some-folder/foo.html' },
+      { url: tmpDir + '/some-folder/nonexistent.html' },
+      { url: tmpDir + '/other.html' },
+      { url: tmpDir + '/other-folder/index.html' },
     ];
     assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir + '/some-folder'],
@@ -48,11 +48,11 @@ describe('paths to localhost', function() {
 
   it('given a --root, it mounts that root for files that are under that root', function() {
     var tasks = [
-      { url: 'file://' + tmpDir + '/some-folder', root: tmpDir },
-      { url: 'file://' + tmpDir + '/some-folder/index.html', root: tmpDir },
-      { url: 'file://' + tmpDir + '/some-folder/foo.html', root: tmpDir },
-      { url: 'file://' + tmpDir + '/other.html', root: tmpDir },
-      { url: 'file://' + tmpDir + '/other-folder/index.html', root: tmpDir },
+      { url: tmpDir + '/some-folder', root: tmpDir },
+      { url: tmpDir + '/some-folder/index.html', root: tmpDir },
+      { url: tmpDir + '/some-folder/foo.html', root: tmpDir },
+      { url: tmpDir + '/other.html', root: tmpDir },
+      { url: tmpDir + '/other-folder/index.html', root: tmpDir },
     ];
     assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir],
@@ -68,11 +68,11 @@ describe('paths to localhost', function() {
 
   it('given a --root, it still adds new mount points for things outside the root', function() {
     var tasks = [
-      { url: 'file://' + tmpDir + '/some-folder', root: tmpDir + '/some-folder' },
-      { url: 'file://' + tmpDir + '/some-folder/index.html', root: tmpDir + '/some-folder' },
-      { url: 'file://' + tmpDir + '/some-folder/foo.html', root: tmpDir + '/some-folder' },
-      { url: 'file://' + tmpDir + '/other.html', root: tmpDir + '/some-folder' },
-      { url: 'file://' + tmpDir + '/other-folder/index.html', root: tmpDir + '/some-folder' },
+      { url: tmpDir + '/some-folder', root: tmpDir + '/some-folder' },
+      { url: tmpDir + '/some-folder/index.html', root: tmpDir + '/some-folder' },
+      { url: tmpDir + '/some-folder/foo.html', root: tmpDir + '/some-folder' },
+      { url: tmpDir + '/other.html', root: tmpDir + '/some-folder' },
+      { url: tmpDir + '/other-folder/index.html', root: tmpDir + '/some-folder' },
     ];
     assert.deepEqual(tasksToMountpoints(tasks, baseUrl), [
       ['/0', tmpDir + '/some-folder'],
@@ -85,6 +85,25 @@ describe('paths to localhost', function() {
       { url: 'http://localhost:3000/0/foo.html', root: tmpDir + '/some-folder' },
       { url: 'http://localhost:3000/1/other.html', root: tmpDir + '/some-folder' },
       { url: 'http://localhost:3000/2/index.html', root: tmpDir + '/some-folder' },
+    ]);
+  });
+
+  it('skips file:// urls', function() {
+    var tasks = [
+      { url: 'file://' + tmpDir + '/some-folder/index.html' },
+      { url: 'file://' + tmpDir + '/some-folder/foo.html' },
+      { url: 'file://' + tmpDir + '/some-folder/nonexistent.html' },
+      { url: 'file://' + tmpDir + '/other.html' },
+      { url: 'file://' + tmpDir + '/other-folder/index.html' },
+    ];
+    assert.deepEqual(tasksToMountpoints(tasks.slice(0), baseUrl), [
+    ]);
+    assert.deepEqual(tasks, [
+      { url: tasks[0].url },
+      { url: tasks[1].url },
+      { url: tasks[2].url },
+      { url: tasks[3].url },
+      { url: tasks[4].url },
     ]);
   });
 

@@ -81,7 +81,6 @@ TargetWindow.prototype.initialize = function(task, onDone) {
     //this.window.setMaximumSize(task.device.screenSize.width, task.device.screenSize.height);
   }
 
-
   this.window.loadUrl(task.url, task['user-agent'] !== '' ? { userAgent: task['user-agent'] } : {});
   // this happens before the page starts executing
   if (task.device) {
@@ -185,6 +184,39 @@ TargetWindow.prototype.capture = function(dims, onDone) {
     onDone();
   }
   tryCapture(dims);
+};
+
+TargetWindow.prototype.pdf = function(onDone) {
+  var self = this;
+  var task = this.task;
+  this.window.printToPDF(xtend({
+    pageSize: 'A4',
+    marginsType: 0,
+    printBackground: false,
+    printSelectionOnly: false,
+    landscape: false
+  }, task.pdf || {}), function(err, data) {
+    if (err) {
+      console.log('Error: ' + err);
+      return;
+    }
+    console.log('write screenshot', task.out);
+    fs.writeFile(task.out, data, function(err) {
+      if (err) {
+        console.log('Error: ' + err);
+      }
+      self.reset();
+      onDone();
+    });
+  });
+};
+
+TargetWindow.prototype.insertCSS = function(css) {
+  this.window.webContents.insertCSS(css);
+};
+
+TargetWindow.prototype.executeJS = function(js) {
+  this.window.webContents.executeJavaScript(js);
 };
 
 TargetWindow.prototype.close = function() {

@@ -25,26 +25,17 @@ describe('paths to filenames', function() {
     ]), ['bar-index', 'baz-index']);
   });
 
-/* moveme
-  it('makes duplicates unique', function() {
-    assert.deepEqual(pathsToFilenames([
-      '/foo/bar.html',
-      '/foo/bar.html',
-    ]), ['bar-1', 'bar-2']);
-  });
-*/
-
   it('works with a single file', function() {
-    console.log(pathsToFilenames([
+    assert.deepEqual(pathsToFilenames([
       '/foo/bar.html',
     ]), ['bar']);
   });
 
   it('works with a single dir', function() {
-    console.log(pathsToFilenames([
+    assert.deepEqual(pathsToFilenames([
       '/foo/bar/',
     ]), ['bar']);
-    console.log(pathsToFilenames([
+    assert.deepEqual(pathsToFilenames([
       '/foo/bar',
     ]), ['bar']);
   });

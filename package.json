@@ -1,7 +1,7 @@
 {
   "name": "electroshot",
   "version": "1.0.0",
-  "description": "Capture website screenshots (with web fonts!) using Electron",
+  "description": "Capture website screenshots with optional device and network emulation as jpg, png or pdf (with web fonts!) using Electron / Chrome.",
   "main": "test.js",
   "scripts": {
     "test": "mocha -R spec --bail ./test/*.test.js"
@@ -17,6 +17,7 @@
     "chromium-emulated-networks": "~1.0.0",
     "cookie": "~0.2.2",
     "electron-prebuilt": "~0.33.6",
+    "es6-template": "~1.0.1",
     "express": "~4.13.3",
     "file-fixture": "0.0.2",
     "miniq": "~1.0.0",

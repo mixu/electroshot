@@ -56,7 +56,7 @@ describe('integration tests', function() {
       assert.ok([
         '46ead2a024bd27574d6ba36f0b47d793',
         '8875084a1f14c512aaf3310917016ddb', // OSX (2x)
-        ].indexOf(md5(tmpDir + '/interval-100x100.png')) !== -1);
+        ].indexOf(md5(tmpDir + '/interval-100x100-at-1000ms.png')) !== -1);
       done();
     });
   });
@@ -179,9 +179,33 @@ describe('integration tests', function() {
     });
   });
 
+  it('can capture a PDF', function(done) {
+    var tmpDir = fixture.dirname();
+    run([
+      '--format', 'pdf',
+      '--pdf-margin', 'minimum',
+      '--pdf-page-size', 'A4',
+      '--pdf-background',
+      '--pdf-orientation', 'landscape',
+      __dirname + '/fixtures/selector.html', '1024x',
+      '--out', tmpDir
+    ], process.cwd(), function() {
+      console.log(tmpDir);
+      done();
+    });
+  });
+
   it('can produce an image that matches a device profile', function() {
 
   });
+
+  it('accepts --js <str>');
+  it('accepts --js <path>');
+  it('accepts --js <str> --js <str>');
+  it('accepts --css <str>');
+  it('accepts --css <path>');
+  it('accepts --css <str> --css <str>');
+
 
   it('accepts --stdin-html + html');
 

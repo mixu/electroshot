@@ -20,6 +20,12 @@ argsToTasks = function(args) {
     if (task['cookie'] === '') {
       delete task['cookie'];
     }
+    if (!task.js) {
+      delete task.js;
+    }
+    if (!task.css) {
+      delete task.css;
+    }
     if (!task.upload) {
       delete task.upload;
     }
@@ -43,23 +49,6 @@ argsToTasks = function(args) {
 };
 
 describe('args to tasks', function() {
-
-  // output path spec
-
-  // cases:
-  // - set a full output path for each file
-  //   - single file
-  //      input: <url> <resolution> <path>
-  //   - many files
-  //      input: <url> <url> <resolution> <path> <path>
-  //      input: <url> <resolution> <path> <url> <resolution> <path>
-  //      input: [  <url> <resolution> <path> ] [ <url> <resolution> <path> ] <--- this
-  // - set a output path but use auto filenames for each file
-  //   - single file
-  //      input: --out <path> <url> <resolution>
-  //   - many files
-  //      input: --out <path> <url> <url> <resolution>
-
 
   it('accepts <url> <resolution>', function() {
     assert.deepEqual(argsToTasks(['http://google.com', '1024x768']), [
@@ -273,7 +262,7 @@ describe('args to tasks', function() {
     ]);
     assert.deepEqual(argsToTasks([tmpDir + '/some-folder', '1024x768']), [
       {
-        url: 'file://' + tmpDir + '/some-folder',
+        url: tmpDir + '/some-folder',
         size: { width: 1024, height: 768 },
         out: process.cwd() + '/some-folder-1024x768.png'
       }
@@ -281,7 +270,7 @@ describe('args to tasks', function() {
     // plain file
     assert.deepEqual(argsToTasks([tmpDir + '/some-folder/index.html', '1024x768']), [
       {
-        url: 'file://' + tmpDir + '/some-folder/index.html',
+        url: tmpDir + '/some-folder/index.html',
         size: { width: 1024, height: 768 },
         out: process.cwd() + '/index-1024x768.png'
       }
@@ -293,7 +282,7 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 768 },
-        out: process.cwd() + '/google.com-1024x768.png',
+        out: process.cwd() + '/google.com-1024x768-at-2000ms.png',
         delay: 2000,
       }
     ]);
@@ -377,21 +366,23 @@ describe('args to tasks', function() {
     ]);
   });
 
+  var appleDevice = {
+    screenPosition: 'mobile',
+    screenSize: { width: 375, height: 667 },
+    viewPosition: { x: 0, y: 0 },
+    offset: {x: 0, y: 0},
+    deviceScaleFactor: 2,
+    fitToView: false,
+    scale: 1,
+  };
+
   var appleExpected = {
         url: 'http://google.com/',
         size: { width: 375, height: 0 },
         out: process.cwd() + '/google.com-apple-iphone-6.png',
         'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
         '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        device: {
-          screenPosition: 'mobile',
-          screenSize: { width: 375, height: 667 },
-          viewPosition: { x: 0, y: 0 },
-          offset: {x: 0, y: 0},
-          deviceScaleFactor: 2,
-          fitToView: false,
-          scale: 1,
-        },
+        device: appleDevice,
       };
 
   it('accepts <url> <device>', function() {
@@ -420,64 +411,73 @@ describe('args to tasks', function() {
 
   it('accepts <url> <horizontal device>', function() {
     assert.deepEqual(argsToTasks(['http://google.com', 'horizontal Apple iPhone 6']), [
-      {
-        url: 'http://google.com/',
-        size: { width: 667, height: 0 },
+      xtend({}, appleExpected, {
         out: process.cwd() + '/google.com-horizontal-apple-iphone-6.png',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
-        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        device: {
-          screenPosition: 'mobile',
+        size: { width: 667, height: 0 },
+        device: xtend({}, appleDevice, {
           screenSize: { width: 667, height: 375 },
-          viewPosition: { x: 0, y: 0 },
-          offset: {x: 0, y: 0},
-          deviceScaleFactor: 2,
-          fitToView: false,
-          scale: 1,
-        },
-      }
+        }),
+      })
+    ]);
+    assert.deepEqual(argsToTasks(['http://google.com', 'horizontal iPhone 6']), [
+      xtend({}, appleExpected, {
+        out: process.cwd() + '/google.com-horizontal-iphone-6.png',
+        size: { width: 667, height: 0 },
+        device: xtend({}, appleDevice, {
+          screenSize: { width: 667, height: 375 },
+        }),
+      })
     ]);
   });
 
   it('accepts <url> <cropped horizontal device>', function() {
     assert.deepEqual(argsToTasks(['http://google.com', 'cropped horizontal Apple iPhone 6']), [
-      {
-        url: 'http://google.com/',
-        size: { width: 667, height: 375 },
+      xtend({}, appleExpected, {
         out: process.cwd() + '/google.com-cropped-horizontal-apple-iphone-6.png',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
-        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        device: {
-          screenPosition: 'mobile',
+        size: { width: 667, height: 375 },
+        device: xtend({}, appleDevice, {
           screenSize: { width: 667, height: 375 },
-          viewPosition: { x: 0, y: 0 },
-          offset: {x: 0, y: 0},
-          deviceScaleFactor: 2,
-          fitToView: false,
-          scale: 1,
-        },
-      }
+        }),
+      })
+    ]);
+    assert.deepEqual(argsToTasks(['http://google.com', 'cropped horizontal iPhone 6']), [
+      xtend({}, appleExpected, {
+        out: process.cwd() + '/google.com-cropped-horizontal-iphone-6.png',
+        size: { width: 667, height: 375 },
+        device: xtend({}, appleDevice, {
+          screenSize: { width: 667, height: 375 },
+        }),
+      })
     ]);
   });
 
   it('accepts <url> <horizontal cropped device>', function() {
     assert.deepEqual(argsToTasks(['http://google.com', 'horizontal cropped Apple iPhone 6']), [
-      {
-        url: 'http://google.com/',
-        size: { width: 667, height: 375 },
+      xtend({}, appleExpected, {
         out: process.cwd() + '/google.com-horizontal-cropped-apple-iphone-6.png',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 ' +
-        '(KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4',
-        device: {
-          screenPosition: 'mobile',
+        size: { width: 667, height: 375 },
+        device: xtend({}, appleDevice, {
           screenSize: { width: 667, height: 375 },
-          viewPosition: { x: 0, y: 0 },
-          offset: {x: 0, y: 0},
-          deviceScaleFactor: 2,
-          fitToView: false,
-          scale: 1,
-        },
-      }
+        }),
+      })
+    ]);
+    assert.deepEqual(argsToTasks(['http://google.com', 'horizontal cropped iPhone 6']), [
+      xtend({}, appleExpected, {
+        out: process.cwd() + '/google.com-horizontal-cropped-iphone-6.png',
+        size: { width: 667, height: 375 },
+        device: xtend({}, appleDevice, {
+          screenSize: { width: 667, height: 375 },
+        }),
+      })
+    ]);
+  });
+
+  it('accepts <device>x<height>', function() {
+    assert.deepEqual(argsToTasks(['http://google.com', '"iPhone 6"x1000']), [
+      xtend({}, appleExpected, {
+        out: process.cwd() + '/google.com-iphone-6.png',
+        size: { width: 375, height: 1000 },
+      })
     ]);
   });
 
@@ -514,43 +514,212 @@ describe('args to tasks', function() {
     ]);
   });
 
-  it('accepts --emulate-network <profile>');
+  it('accepts --emulate-network <profile>', function() {
+    assert.deepEqual(argsToTasks(['--emulate-network', 'Regular 3G', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768.png',
+        latency: 100,
+        download: 96000,
+        upload: 96000,
+      }
+    ]);
+  });
 
-  it('accepts multiple --delay(s)');
+  it('accepts multiple --delay(s) and makes duplicate filenames unique', function() {
+    assert.deepEqual(argsToTasks(['--delay', '2000', '--delay', '4000', 'http://google.com', '1024x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768-at-2000ms.png',
+        delay: 2000,
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/google.com-1024x768-at-4000ms.png',
+        delay: 4000,
+      }
+    ]);
+  });
 
-  it('accepts a file:// url');
+  it('accepts a file:// url as a passthru', function() {
+    assert.deepEqual(argsToTasks(['file:///tmp/foo', '1024x768']), [
+      {
+        url: 'file:///tmp/foo',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/foo-1024x768.png',
+      }
+    ]);
+  });
 
-  it('accepts --js <str>');
-  it('accepts --js <path>');
-  it('accepts --js <str> --js <str>');
-  it('accepts --css <str>');
-  it('accepts --css <path>');
-  it('accepts --css <str> --css <str>');
+  it('accepts a --filename option', function() {
+    var now = new Date();
+    var d = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate(),
+        t = now.getHours() + '-' + now.getMinutes() + '-' + now.getSeconds();
+
+    assert.deepEqual(argsToTasks([
+      '--filename', '{crop}{date}-{time}{delay}{name}{size}{width}y{height}.{format}',
+      'http://google.com', '1024x', '1366x768']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        // Should be '/' + d + '-' + t + 'google.com1024x01024y0.png'
+        out: process.cwd() + '/crop' + d + '-' + t + 'delaygoogle.com1024x01024yheight.png'
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 1366, height: 768 },
+        out: process.cwd() + '/-cropped' + d + '-' + t + 'delaygoogle.com1366x7681366y768.png'
+      },
+    ]);
+    // abspath
+    assert.deepEqual(argsToTasks([
+      '--filename', '/bar/foo.png',
+      'http://google.com', '1024x']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: '/bar/foo.png'
+      }
+    ]);
+    // override in a group
+    assert.deepEqual(argsToTasks([
+      '[', '--filename', '/bar/{name}.png', 'http://google.com', '1024x', ']',
+      '[', '--filename', '/some/{size}.png', 'http://google.com', '1024x768', ']',
+    ]), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: '/bar/google.com.png'
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: '/some/1024x768.png'
+      }
+    ]);
+    assert.deepEqual(argsToTasks([
+    // override has duplicated name handling
+      '--filename', '/bar/foo.png',
+      'http://google.com', '1024x', '1024x768',
+    ]), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: '/bar/foo-1.png'
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 768 },
+        out: '/bar/foo-2.png'
+      }
+    ]);
+  });
+
+  it('accepts multiple --device <json>', function() {
+    assert.deepEqual(argsToTasks([
+      'http://google.com', '--device', JSON.stringify(appleDevice),
+      '--device', JSON.stringify(xtend({ name: 'foo' }, appleDevice)),
+    ]), [
+      {
+        url: 'http://google.com/',
+        size: { width: 375, height: 667 },
+        out: process.cwd() + '/google.com-custom.png',
+        device: appleDevice
+      },
+      {
+        url: 'http://google.com/',
+        size: { width: 375, height: 667 },
+        out: process.cwd() + '/google.com-foo.png',
+        device: appleDevice
+      },
+    ]);
+
+  });
+
+  it('accepts --format pdf', function() {
+    assert.deepEqual(argsToTasks([
+      '--format', 'pdf',
+      'http://google.com', '1024x']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: process.cwd() + '/google.com-1024x0.pdf',
+        format: 'pdf',
+        pdf: {
+          pageSize: 'A4',
+          marginsType: 0,
+          printBackground: false,
+          landscape: false,
+        },
+      }
+    ]);
+  });
+
+  it('accepts --pdf-margin --pdf-page-size --pdf-background --pdf-orientation', function() {
+    assert.deepEqual(argsToTasks([
+      '--format', 'pdf',
+      '--pdf-margin', 'minimum',
+      '--pdf-page-size', 'legal',
+      '--pdf-background',
+      '--pdf-orientation', 'landscape',
+      'http://google.com', '1024x']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: process.cwd() + '/google.com-1024x0.pdf',
+        format: 'pdf',
+        pdf: {
+          pageSize: 'Legal',
+          marginsType: 2,
+          printBackground: true,
+          landscape: true,
+        },
+      }
+    ]);
+  });
+
+  it('accepts --js <str>', function() {
+    assert.deepEqual(argsToTasks([
+      '--js', 'console.log("Hello");',
+      'http://google.com', '1024x']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: process.cwd() + '/google.com-1024x0.png',
+        js: 'console.log("Hello");',
+      }
+    ]);
+  });
+  it('accepts --css <str>', function() {
+    assert.deepEqual(argsToTasks([
+      '--css', '* { font-size: x-large;}',
+      'http://google.com', '1024x']), [
+      {
+        url: 'http://google.com/',
+        size: { width: 1024, height: 0 },
+        out: process.cwd() + '/google.com-1024x0.png',
+        css: '* { font-size: x-large;}',
+      }
+    ]);
+  });
+
+  it('accepts --parallel <n> (num windows)');
+
+  // device and --emulate-network are case insensitive
+  // device and --emulate-network are separator-insensitive
+
+  // filenames for URLs with lots of stuff in them https://github.com/mixu/gr#features?foo=bar
 
   it('accepts --max-wait <ms>');
   it('accepts --debug');
   // --debug (pop open electron window, verbose logging)
 
-  it('accepts --device <json>');
-
-  it('accepts a file path option');
-  // for specific file names
-
-  // --parallel <n> (num windows)
-
-  // Exclude company names:
-  // e.g. iPhone 6 => Apple iPhone 6
-
   // good looking messages V Generated 3 screenshots from 2 urls
-
-  // --format pdf
-  //   --pdf-margin default|none|minimum
-  //   --pdf-page-size A4|A3|Legal|Letter|Tabloid
-  //   --pdf-background true|false
-  //   --pdf-orientation landscape|portrait
-
 
   // Later:
   // --delay name of callback
-  // --filename <template>
+  // --html in? can use data: urls!
 });

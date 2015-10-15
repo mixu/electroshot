@@ -8,7 +8,22 @@ module.exports = function(tasks) {
       console.log(task);
 
       targetWindow.initialize(task, function() {
-        if (task.selector) {
+        // --css
+        if (task.css) {
+          (Array.isArray(task.css) ? task.css : [ task.css ]).forEach(function(css) {
+            targetWindow.insertCSS(css);
+          });
+        }
+        // --js
+        if (task.js) {
+          (Array.isArray(task.js) ? task.js : [ task.js ]).forEach(function(js) {
+            targetWindow.executeJS(js);
+          });
+        }
+
+        if (task.format === 'pdf') {
+          targetWindow.pdf(done);
+        } else if (task.selector) {
           targetWindow.getDimensions(task.selector, function(dims) {
             targetWindow.capture(dims, done);
           });
