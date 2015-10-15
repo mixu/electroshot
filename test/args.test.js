@@ -565,13 +565,12 @@ describe('args to tasks', function() {
       {
         url: 'http://google.com/',
         size: { width: 1024, height: 0 },
-        // Should be '/' + d + '-' + t + 'google.com1024x01024y0.png'
-        out: process.cwd() + '/crop' + d + '-' + t + 'delaygoogle.com1024x01024yheight.png'
+        out: process.cwd() + '/' + d + '-' + t + 'google.com1024x01024y0.png'
       },
       {
         url: 'http://google.com/',
         size: { width: 1366, height: 768 },
-        out: process.cwd() + '/-cropped' + d + '-' + t + 'delaygoogle.com1366x7681366y768.png'
+        out: process.cwd() + '/-cropped' + d + '-' + t + 'google.com1366x7681366y768.png'
       },
     ]);
     // abspath
@@ -693,6 +692,7 @@ describe('args to tasks', function() {
       }
     ]);
   });
+
   it('accepts --css <str>', function() {
     assert.deepEqual(argsToTasks([
       '--css', '* { font-size: x-large;}',
@@ -706,12 +706,17 @@ describe('args to tasks', function() {
     ]);
   });
 
-  it('accepts --parallel <n> (num windows)');
-
+  it('stringifies complex urls', function() {
+    assert.deepEqual(argsToTasks(['https://github.com/mixu/gr?foo=bar#features', '1024x768']), [
+      {
+        url: 'https://github.com/mixu/gr?foo=bar#features',
+        size: { width: 1024, height: 768 },
+        out: process.cwd() + '/github.com-mixu-gr-foo=bar#features-1024x768.png',
+      }
+    ]);
+  });
   // device and --emulate-network are case insensitive
   // device and --emulate-network are separator-insensitive
-
-  // filenames for URLs with lots of stuff in them https://github.com/mixu/gr#features?foo=bar
 
   it('accepts --max-wait <ms>');
   it('accepts --debug');
@@ -722,4 +727,5 @@ describe('args to tasks', function() {
   // Later:
   // --delay name of callback
   // --html in? can use data: urls!
+  // it('accepts --parallel <n> (num windows)');
 });

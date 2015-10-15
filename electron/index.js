@@ -1,5 +1,6 @@
 var fs = require('fs'),
     path = require('path');
+    ml = require('minilog');
 
 var app = require('app'),
     subarg = require('subarg');
@@ -12,18 +13,26 @@ if (argv.v || argv.version) {
 }
 
 var runTasks = require('./run-tasks.js');
+var log = require('minilog')('electron');
+
+var filter = new ml.Filter();
+if (!argv.debug) {
+  filter.deny('electron', 'warn');
+}
+ml.pipe(filter)
+  .pipe(ml.defaultFormatter)
+  .pipe(ml.defaultBackend);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
 var mainWindow = null;
 
-Object.keys(argv).filter(function(key) { return key !== '_' && !argv[key]._; }).map(function(key) {
-  console.log('Setting Chrome flag: ' + key + ' ' + argv[key]);
+Object.keys(argv).filter(function(key) { return key !== '_' && key !== 'debug' && !argv[key]._; }).map(function(key) {
+  log.debug('Setting Chrome flag: ' + key + ' ' + argv[key]);
   app.commandLine.appendSwitch(key, argv[key].toString());
 });
 
 app.on('window-all-closed', function() {
-  console.log('window-all-closed');
   app.quit();
 });
 

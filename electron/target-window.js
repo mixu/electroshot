@@ -3,7 +3,12 @@ var fs = require('fs'),
     path = require('path');
 
 var ipc = require('ipc'),
-    BrowserWindow = require('browser-window');
+    BrowserWindow = require('browser-window'),
+    xtend = require('xtend');
+
+var log = require('minilog')('electron');
+
+var dres;
 
 function TargetWindow() {
   this.window = null;
@@ -12,21 +17,34 @@ function TargetWindow() {
 // sync initialization
 TargetWindow.prototype.initialize = function(task, onDone) {
   var self = this;
+  var display = require('screen');
+  var browserOpts = {
+    show: true,
+    // SEGFAULTS on linux (!) with Electron 0.33.7 (!!)
+    'enable-larger-than-screen': (os.platform() !== 'linux'),
+    'skip-taskbar': true,
+    'use-content-size': true,
+    frame: (task.debug ? true : false),
+    'web-preferences': {
+      'overlay-scrollbars': false,
+      'page-visibility': true,
+    }
+  };
+
+  if (!task.debug) {
+    if (!dres) {
+      dres = display.getPrimaryDisplay().workAreaSize;
+    }
+    // Workaround for https://github.com/atom/electron/issues/2610
+    browserOpts.x = dres.width;
+    browserOpts.y = dres.height;
+  }
+
   this.task = task;
   if (!this.window) {
-    this.window = new BrowserWindow({
-      show: true,
-      // SEGFAULTS on linux (!) with Electron 0.33.7 (!!)
-      'enable-larger-than-screen': (os.platform() !== 'linux'),
-      'skip-taskbar': true,
-      'use-content-size': true,
-      // resizable: false,
-      // frame: false,
-      'web-preferences': {
-        'overlay-scrollbars': false,
-        'page-visibility': true,
-      }
-    });
+    this.window = new BrowserWindow(browserOpts);
+    this.window.showInactive();
+
     // Emitted when the window is closed.
     this.window.on('closed', function() {
       // Dereference the window object, usually you would store windows
@@ -37,21 +55,14 @@ TargetWindow.prototype.initialize = function(task, onDone) {
   }
 
   // width, height
-  this.window.setSize(task.size.width, task.size.height || 768);
+  this.window.setContentSize(task.size.width, task.size.height || 768);
 
   ipc.once('window-loaded', function() {
-    console.log('IPC', 'window-loaded');
-    console.log('SEND', 'ensure-rendered');
-
-    // webContents configuration
-    // - zoom factor
-    if (task['zoom-factor'] !== 1) {
-      console.log('SEND', 'set-zoom-factor', task['zoom-factor']);
-      self.window.webContents.send('set-zoom-factor', task['zoom-factor']);
-    }
+    log.debug('IPC', 'window-loaded');
+    log.debug('SEND', 'ensure-rendered');
 
     ipc.once('loaded', function() {
-      console.log('IPC', 'loaded');
+      log.debug('IPC', 'loaded');
 
       if (task.size.height > 0) {
         return onDone();
@@ -72,7 +83,18 @@ TargetWindow.prototype.initialize = function(task, onDone) {
       });
       self.window.webContents.send('get-content-dimensions');
     });
-    self.window.webContents.send('ensure-rendered', task.delay, 'loaded');
+
+    // webContents configuration
+    // - zoom factor
+    if (task['zoom-factor'] !== 1) {
+      log.debug('SEND', 'set-zoom-factor', task['zoom-factor']);
+      self.window.webContents.send('set-zoom-factor', task['zoom-factor']);
+      ipc.once('return-zoom-factor', function() {
+        self.window.webContents.send('ensure-rendered', task.delay, 'loaded');
+      });
+    } else {
+      self.window.webContents.send('ensure-rendered', task.delay, 'loaded');
+    }
   });
 
   if (task.device) {
@@ -90,10 +112,10 @@ TargetWindow.prototype.initialize = function(task, onDone) {
   if (task.cookies) {
     // TODO wait
     task.cookies.forEach(function(cookie) {
-      console.log('Set cookie', cookie);
+      log.debug('Set cookie', cookie);
       self.window.webContents.session.cookies.set(cookie, function(err) {
         if (err) {
-          console.log('ERR Set cookie', cookie, err);
+          log.debug('ERR Set cookie', cookie, err);
         }
       });
     });
@@ -167,7 +189,7 @@ TargetWindow.prototype.capture = function(dims, onDone) {
 
   function complete(data, err) {
     if (data.isEmpty() || err) {
-      console.log(data.isEmpty() ? 'Screenshot is empty, retrying' : 'Error: ' + err);
+      log.warn(data.isEmpty() ? 'Screenshot is empty, retrying' : 'Error: ' + err);
       tries++;
       if (tries > 5) {
         return onDone(err);
@@ -178,7 +200,7 @@ TargetWindow.prototype.capture = function(dims, onDone) {
       return;
     }
 
-    console.log('write screenshot', task.out);
+    console.log('Writing screenshot', task.out);
     fs.writeFile(task.out, (task.format === 'png' ? data.toPng() : data.toJpeg(task.quality)));
     self.reset();
     onDone();
@@ -197,13 +219,13 @@ TargetWindow.prototype.pdf = function(onDone) {
     landscape: false
   }, task.pdf || {}), function(err, data) {
     if (err) {
-      console.log('Error: ' + err);
+      log.error('Error: ' + err);
       return;
     }
-    console.log('write screenshot', task.out);
+    console.log('Writing PDF', task.out);
     fs.writeFile(task.out, data, function(err) {
       if (err) {
-        console.log('Error: ' + err);
+        log.error('Error: ' + err);
       }
       self.reset();
       onDone();

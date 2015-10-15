@@ -1,11 +1,12 @@
 var TargetWindow = require('./target-window');
 var parallel = require('miniq');
+var log = require('minilog')('electron');
 
 module.exports = function(tasks) {
   var targetWindow = new TargetWindow();
   parallel(1, tasks.map(function(task, i) {
     return function(done) {
-      console.log(task);
+      log.debug(task);
 
       targetWindow.initialize(task, function() {
         // --css
@@ -40,7 +41,6 @@ module.exports = function(tasks) {
       });
     };
   }), function() {
-    console.log('ALL DONE');
     if (targetWindow) {
       targetWindow.close();
     }

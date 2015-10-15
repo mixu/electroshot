@@ -89,7 +89,7 @@ describe('integration tests', function() {
     run([
       '[',
         __dirname + '/fixtures/selector.html',
-        '100x100',
+        '300x300',
         '--zoom-factor', '3',
       ']',
       '[',
@@ -100,15 +100,16 @@ describe('integration tests', function() {
       '--out', tmpDir,
        ], process.cwd(), function() {
         assert.ok([
+            'b42d35b26ff2d5aab7eebc9fd1bccadc',
             '21d28dbf925e0a0152ff4d2785733f30', // OSX
             '2298cb9cb647cdafe04261ffa1cbbef5', // OSX (2x)
             'bb4ab9d772fd6d9ab92ee8c4646c3df1', // Ubuntu
-          ].indexOf(md5(tmpDir + '/selector-100x100-1.png')) !== -1
+          ].indexOf(md5(tmpDir + '/selector-300x300.png')) !== -1
         );
         assert.ok([
             'bae69b8086212675c19dfdbba2c84eeb', // OSX
             '03bf106d36c7d05c029347762dbab688', // OSX (2x)
-          ].indexOf(md5(tmpDir + '/selector-100x100-2.png')) !== -1
+          ].indexOf(md5(tmpDir + '/selector-100x100.png')) !== -1
         );
         done();
     });
@@ -208,8 +209,6 @@ describe('integration tests', function() {
 
 
   it('accepts --stdin-html + html');
-
-  // Workaround for https://github.com/atom/electron/issues/2610
 
   describe('errors', function() {
 

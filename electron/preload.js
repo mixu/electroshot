@@ -22,7 +22,7 @@ ipc.on('ensure-rendered', function ensureRendered(delay, eventName) {
     // WebKit hack :(
     style.appendChild(document.createTextNode(''));
     document.head.appendChild(style);
-    style.sheet.insertRule('::-webkit-scrollbar { display: none; }');
+    style.sheet.insertRule('::-webkit-scrollbar { display: none; }', 0);
   } catch (e) {}
 
   waitFor(delay, function() {
@@ -62,6 +62,7 @@ ipc.on('get-content-dimensions', function() {
 ipc.on('set-zoom-factor', function(factor) {
   console.log('set-zoom-factor', factor);
   webFrame.setZoomFactor(factor);
+  ipc.send('return-zoom-factor');
 });
 
 console.log('SEND', 'window-loaded');

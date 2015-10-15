@@ -8,7 +8,8 @@ var electron = require('electron-prebuilt'),
     subarg = require('subarg'),
     xtend = require('xtend'),
     networkConditions = require('chromium-emulated-networks'),
-    emulatedDevices = require('chromium-emulated-devices').extensions;
+    emulatedDevices = require('chromium-emulated-devices').extensions,
+    logSymbols = require('log-symbols');
 
 var defaultOptions = require('../lib/default-options.js'),
     argsToTasks = require('../lib/args-to-tasks.js'),
@@ -75,26 +76,29 @@ function runElectron() {
   var electronArgs = [
     __dirname + '/../electron/index.js'
   ].concat(Object.keys(argv).filter(function(key) {
-    return typeof defaultOptions[key] === 'undefined' && key !== '_';
+    return typeof defaultOptions[key] === 'undefined' && key !== '_' || key === 'debug';
   }).reduce(function(all, key) {
     if (typeof argv[key] !== 'boolean') {
       return all.concat(['--' + key, argv[key]]);
     } else {
-      return all.concat('--' + (argv[key] ? 'no-' : '') + key);
+      return all.concat('--' + (!argv[key] ? 'no-' : '') + key);
     }
   }, []));
 
-  console.log(electronArgs);
   var child = spawn(electron, electronArgs, {
       stdio: ['pipe', process.stdout, process.stderr]
   });
 
   child.stdin.end(JSON.stringify(tasks));
 
-  child.on('close', function(code) {
-    console.log('Electron exited');
+  child.on('exit', function(code) {
     if (server) {
       server.close();
+    }
+    if (code !== 0) {
+      console.log('Electron exited with code ' + code);
+    } else {
+      console.log(logSymbols.success, 'Generated ' + tasks.length + ' screenshot' + (tasks.length > 1 ? 's' : '') + '.');
     }
   });
 }
