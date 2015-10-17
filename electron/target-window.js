@@ -57,6 +57,73 @@ TargetWindow.prototype.initialize = function(task, onDone) {
   // width, height
   this.window.setContentSize(task.size.width, task.size.height || 768);
 
+
+  if (task.device) {
+    // useful: set the size exactly (contentsize is not useful here)
+    this.window.setSize(task.device.screenSize.width, task.device.screenSize.height);
+    //this.window.setMaximumSize(task.device.screenSize.width, task.device.screenSize.height);
+  }
+
+  this.window.loadUrl(task.url, task['user-agent'] !== '' ? { userAgent: task['user-agent'] } : {});
+  // this happens before the page starts executing
+  if (task.device) {
+    this.window.webContents.enableDeviceEmulation(task.device);
+  }
+
+  if (task.cookies) {
+    // TODO wait
+    task.cookies.forEach(function(cookie) {
+      log.debug('Set cookie', cookie);
+      self.window.webContents.session.cookies.set(cookie, function(err) {
+        if (err) {
+          log.debug('ERR Set cookie', cookie, err);
+        }
+      });
+    });
+  }
+
+  var has = {
+    latency: typeof task.latency === 'number',
+    download: typeof task.download === 'number',
+    upload: typeof task.upload === 'number',
+  };
+
+  var hasThrottling = has.latency || has.download || has.upload;
+  if (hasThrottling) {
+    // when not set, default to "WiFi" profile
+    self.window.webContents.session.enableNetworkEmulation({
+      latency: has.latency ? task.latency : 2,
+      downloadThroughput: has.download ? task.download : 3932160,
+      uploadThroughput: has.upload ? task.upload : 3932160
+    });
+  }
+
+  if (task.delay !== 0) {
+    // clear the cache
+    this.window.webContents.session.clearCache(function() {
+      self.completeInit(task, onDone);
+    });
+  } else {
+    self.completeInit(task, onDone);
+  }
+};
+
+TargetWindow.prototype.completeInit = function(task, onDone) {
+  if (task.delay !== 0) {
+    // executeJavaScript runs after the page is loaded, so we cannot use it with delays (!)
+    // Note that zoom-factor and selector are incompatible ...
+    setTimeout(function() {
+      onDone();
+    }, task.delay);
+  } else {
+    this.setUpPreloadedListener(task, onDone);
+    // to work around https://github.com/atom/electron/issues/1580
+    this.window.webContents.executeJavaScript(fs.readFileSync(path.resolve(__dirname + '/preload.js'), 'utf8'), false);
+  }
+};
+
+TargetWindow.prototype.setUpPreloadedListener = function(task, onDone) {
+  var self = this;
   ipc.once('window-loaded', function() {
     log.debug('IPC', 'window-loaded');
     log.debug('SEND', 'ensure-rendered');
@@ -96,49 +163,8 @@ TargetWindow.prototype.initialize = function(task, onDone) {
       self.window.webContents.send('ensure-rendered', task.delay, 'loaded');
     }
   });
-
-  if (task.device) {
-    // useful: set the size exactly (contentsize is not useful here)
-    this.window.setSize(task.device.screenSize.width, task.device.screenSize.height);
-    //this.window.setMaximumSize(task.device.screenSize.width, task.device.screenSize.height);
-  }
-
-  this.window.loadUrl(task.url, task['user-agent'] !== '' ? { userAgent: task['user-agent'] } : {});
-  // this happens before the page starts executing
-  if (task.device) {
-    this.window.webContents.enableDeviceEmulation(task.device);
-  }
-
-  if (task.cookies) {
-    // TODO wait
-    task.cookies.forEach(function(cookie) {
-      log.debug('Set cookie', cookie);
-      self.window.webContents.session.cookies.set(cookie, function(err) {
-        if (err) {
-          log.debug('ERR Set cookie', cookie, err);
-        }
-      });
-    });
-  }
-
-  var has = {
-    latency: typeof task.latency === 'number',
-    download: typeof task.download === 'number',
-    upload: typeof task.upload === 'number',
-  };
-
-  if (has.latency || has.download || has.upload) {
-    // when not set, default to "WiFi" profile
-    self.window.webContents.session.enableNetworkEmulation({
-      latency: has.latency ? task.latency : 2,
-      downloadThroughput: has.download ? task.download : 3932160,
-      uploadThroughput: has.upload ? task.upload : 3932160
-    });
-  }
-
-  // to work around https://github.com/atom/electron/issues/1580
-  this.window.webContents.executeJavaScript(fs.readFileSync(path.resolve(__dirname + '/preload.js'), 'utf8'));
 };
+
 
 TargetWindow.prototype.reset = function() {
   var self = this;

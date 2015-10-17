@@ -1,28 +1,24 @@
 # electroshot
 
-Capture website screenshots with optional device and network emulation as jpg, png or pdf (with web fonts!) using Electron / Chrome.
+Capture website screenshots with optional device and network emulation as JPG, PNG or PDF (with web fonts!) using Electron / Chrome.
 
 # Features
 
-- Webfonts! `electroshot` uses Electron, which offers the most recent stable version of Chrome (rather than one from years ago); this means that pages render as they would in a browser, including web fonts! Electron is also much faster to install, as it has prebuilt binaries that install thru npm on Ubuntu/OSX/Windows.
+- Webfonts! `electroshot` uses Electron, which offers the most recent stable version of Chrome (rather than one from years ago); this means that pages render as they would in a browser, including web fonts!
+- Electron is also much faster to install, as it has prebuilt binaries that install thru npm on Ubuntu/OSX/Windows.
 - You can capture screenshots from:
   - local file paths: these are served up over http by default, eliminating the hassles that come with `file://` protocol CORS security settings (etc.)
   - http and https URLs
-  - strings of HTML (piped in)
   - as a timelapse using multiple `--delay`s
-- You can capture png or jpeg screenshots:
+- You can capture PNG, JPG or PDF screenshots:
   - cropped to a specific size
   - full-page screenshots at a particular width (e.g. for testing CSS)
   - a single element matched by a specific CSS selector
   - ... after either waiting for the page to render, or after a custom timeout
-- Supports Chrome's powerful options for device emulation and network condition emulation - so you can see what your site would look like on a specific device or given significantly worse network conditions.
-  - includes user agent settings, device pixel ratio and screen resolutions at different orientations
-  - includes RTT latency and upload and download bandwidth throttling
-
-- capture options:
-  - perform other actions on specific elements on the page before screenshotting
-  - wait timeout (for killing the process)
-  - zoom factor / scaling
+- Supports Chrome's powerful options for device emulation
+  - ... which make it easy to emulate a specific device, like the iPhone, with the right user agent settings, device pixel ratio and screen resolution
+- Supports Chrome's network condition emulation options (RTT latency and bandwidth throttling)
+  - ... which (with `--delay`) make it easy to produce a page load timeline
 
 ## Quickstart
 
@@ -35,7 +31,7 @@ Install `electroshot` via npm (to get npm, just [install Node.js](http://nodejs.
 Specify urls and screen resolutions as arguments - urls first. The CLI design was strongly influenced by the excellent [pageres-cli](https://github.com/sindresorhus/pageres-cli) CLI.
 
 ```
-electroshot <url> <resolution>
+electroshot <url> <resolution | device preset>
 
 electroshot google.com 1024x768
 electroshot google.com 1024x768 1366x768 # 2 screenshots
@@ -43,60 +39,76 @@ electroshot google.com yahoo.com 1024x768 # 2 screenshots
 electroshot google.com yahoo.com 1024x768 1366x768 # 4 screenshots
 ```
 
+You can also capture screenshots with device emulation on. Device presets work just like resolutions:
+
+```
+electroshot google.com "iPhone 6"
+electroshot google.com "horizontal iPhone 6" "Nexus 6" # 2 screenshots
+electroshot google.com yahoo.com 1024x768 "Nokia N9" # 4 screenshots
+```
+
+To list all the device presets, run `electroshot --list-devices`. Prepending "horizontal" to the device name switches it to horizontal (landscape) orientation.
+
+To use a custom device, set `--device <json>`, where the value is a JSON blob that defines a custom device, similar to how devices are listed in [chromium-emulated-devices](https://github.com/mixu/chromium-emulated-devices) under `extensions.device` in `index.json`.
+
+You can also pass in file paths. By default, file paths are served through an Express static file server on localhost to avoid the hassles that come with the `file://` protocol. By default, the directory that contains the file becomes the webroot of the server.
+
+```
+electroshot /path/index.html 1024x768 # mounts /path onto localhost:3000/
+electroshot file:///path/index.html 1024x768 # skips mounting, and loads a file:// url
+```
+
+You can capture a local file directly without a static file server by explicitly starting files with the `file://` protocol.
+
+You can set the web server root by setting `--root /path` explicitly.
+
+```
+electroshot /foo/bar/index.html 1024 --root /foo
+```
+
+## Cropping
+
 By default, what you say is what you get - the screenshots are clipped to the specified size. To generate a screenshot of the whole page (e.g. as tall needed for the page), just leave out the height:
 
 ```
 electroshot google.com 800x
 electroshot google.com 800 # also works
+electroshot google.com "cropped iPhone 6" # cropped to iPhone 6 screen height
+electroshot google.com "iPhone6"x800 # cropped to 800 px tall
 ```
 
-You can also pass in file paths. By default, file paths are served over localhost to avoid the hassles around the `file://` protocol. Specifically, the directory that contains the file becomes the webroot of the server.
+Emulated devices can also be cropped. Prepending "cropped" to the device name will produce a screenshot that is the size of a single screen for that device. You can also set a specific pixel height as shown in the example above.
 
-If you want to, you can use the `file://` protocol by prefixing all your paths with `file://`; these files will then be directly loaded from the file system.
+## Capture groups
 
 You can group arguments with square brackets:
 
 ```
-cases:
-- set a full output path for each file
-  - single file
-     input: <url> <resolution> <path>
-  - many files
-     input: <url> <url> <resolution> <path> <path>
-     input: <url> <resolution> <path> <url> <resolution> <path>
-     input: [  <url> <resolution> <path> ] [ <url> <resolution> <path> ] <--- this
-- set a output path but use auto filenames for each file
-  - single file
-     input: --out <path> <url> <resolution>
-  - many files
-     input: --out <path> <url> <url> <resolution>
+electroshot [ <url> <resolution> ] [ <url> <resolution> ]
+electroshot [ <url> <resolution> ... ]
+
+# Mix grouped and single arguments
+electroshot [ google.com 1024x768 1600x900 ] google.com 1366x768
+
+# Options defined inside a group will override the outer ones.
+electroshot [ google.com 1024x --format png ] google.com 1366x --format jpg
 ```
 
 ## Capture options
 
-- output formats:
-  - PDF?
-    - paper-format
-    - paper-orientation
-    - paper-margin
+### Location and file name
 
-marginsType Integer - Specify the type of margins to use
-0 - default
-1 - none
-2 - minimum
-pageSize String - Specify page size of the generated PDF.
-A4
-A3
-Legal
-Letter
-Tabloid
-printBackground Boolean - Whether to print CSS backgrounds.
-printSelectionOnly Boolean - Whether to print selection only.
-landscape Boolean - true for landscape, false for portrait.
-
-## File names
+You can set the output directory by setting `--out <dir>` (default: process.cwd).
 
 You can explicitly set the full path for each screenshot using `--filename <path>`. Relative paths in file names are relative to `--out`, full paths are preserved as-is.
+
+```
+electroshot google.com 1024 --out /foo/bar
+# -> writes /foo/bar/screenshot.png
+electroshot google.com 1024 --out /foo/bar --filename "screenshot.png"
+# -> writes /foo/bar/google.com-linux.png
+electroshot google.com 1024 --filename "/foo/bar/{name}-{platform}{format}"
+```
 
 You can also use the following tokens to specify a template for filenames. The default template is `{name}-{size}.{format}`; if you set a `--delay`, it is `{name}-{size}-at-{delay}ms.{format}`.
 
@@ -114,87 +126,116 @@ You can also use the following tokens to specify a template for filenames. The d
 - `{size}`: if a device is emulated, this is the name of device (e.g. `iphone-6`); otherwise this is equivalent to `{width}x{height}`.
 - `{width}`: the current width, e.g. `1024`
 - `{height}`: the current height, e.g. `768`
+- `{platform}`: the current operating system as returned by [`os.platform()`](https://nodejs.org/api/os.html#os_os_platform)
 - `{format}`: `.png` or `.jpg`
 
 If the generated filenames are not unique, a number will be appended to the paths, e.g. `foo.com-1024x768-1.png` and `foo.com-1024x768-2.png`.
 
+### Page rendering: delay, selector, zoom-factor
+
+You can capture a specific DOM element via `--selector <expr>`. The selector is passsed to [`document.querySelector`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector). The screenshot is cropped and sized to match the element as it appears on the page.
+
+You can set the default zoom factor of the page using `--zoom-factor <n>`. 1.0 represents 100% and 3.0 represents 300%.
+
+On OSX, you should also be aware of the Chrome flag `--force-device-scale-factor <n>` which forces Chrome to use a specific high dpi scale factor. You can pass Chrome flags to `electroshot` and they will be passed through to Electron / Chrome.
+
+To introduce a delay to the page capture, specify `--delay <ms>`. The default value is `0`, which simply waits until two [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame) calls have passed. This is usually enough time to capture something reasonable.
+
+You can set multiple `--delay`s to capture the page(s) at multiple points in time. Combined with `--emulate-network`, this can produce a full timeline of loading a specific page under slow network access.
+
+```
+electroshot --emulate-network "Good 3G" theverge.com "cropped Nexus 6" --delay 1000 --delay 3000 --delay 5000 --delay 6000 --delay 8000 --delay 0
+```
+
+Note that there are some limitations when using `--delay`. Specifically:
+
+- you need to explicitly specify the height of the screen capture and
+- you cannot specify `--selector` or `--zoom-factor`
+
+This is because those features require `electroshot` to inject a content script, and Electron's `executeJavaScript` API waits until the page is fully loaded before executing injected scripts - so I had to pick between having those features available or having accurate timing information. Let me know if you can figure out a better way to handle those features.
+
+### Format-specific options
+
+You can capture screenshots as JPG, PNG, or PDF by setting `--format <png|jpg|pdf>`. The following options control format-specific options.
+
+- `--quality <0..100>`: Sets the jpg quality parameter (default: 75).
+- `--pdf-margin <default|none|minimum>`: Sets the PDF margin.
+- `--pdf-page-size <size>`: Sets the PDF page size. Valid values are `A4`, `A3`, `legal`, `letter`, `tabloid`
+- `--pdf-background`:   Whether to print CSS backgrounds. (false by default)
+- `--pdf-orientation <orientation>`: Sets the PDF orientation. Valid values are `landscape` and `portrait`.
+
+## Network emulation
+
+To list all the known network condition presets, run `electroshot --list-networks`.
+
+Use `--emulate-network <preset>` to set a specific network profile.
+
+```
+electroshot --emulate-network "Good 3G" theverge.com "cropped iPhone 6"
+```
+
+You can also set the network parameters individually:
+
+- `--latency <ms>`: RTT in ms.
+- `--download <Bps>`: Download rate in Bps.
+- `--upload <Bps>`: Upload rate in Bps.
+
 ## Capturing using an headless server / vagrant / docker
 
-See: https://github.com/atom/electron/issues/228
+Most headless (e.g. no X11) environments will need some additional packages to be installed for `electroshot` to work. Here's one example snippet:
 
-## Server options
+```
+# Install dependencies
+apt-get update &&\
+    apt-get install -y libgtk2.0-0 libgconf-2-4 \
+    libasound2 libxtst6 libxss1 libnss3 xvfb
 
-- cookies
-- ignore SSL errors
-- set user agent
+# Start Xvfb
+Xvfb -ac -screen scrn 1280x2000x24 :9.0 &
+export DISPLAY=:9.0
+```
+
+Related issue on Electron: https://github.com/atom/electron/issues/228
+
+## HTTP options
+
+You can set a custom user agent using `--user-agent <string>`.
+
+You can set a custom cookie using `--cookie <cookie>`. This can be set multiple times.
+
+The local file server starts on `localhost` port `3000` by default if you pass in local file paths. You can set the hostname and port using `--host <hostname>` and `--port <port>`. As discussed earlier, you can control the mount point by setting `--root <dir>`.
+
+If you need to ignore SSL errors, you can set the Chrome flag `--ignore-certificate-errors`.
 
 ## Content injection
 
-- injection:
-  - inject CSS / JS onto the page
+You can inject CSS and JS into the page using the following options:
 
+- `--css <str>`: Inserts a string of CSS onto the page. Can be set multiple times.
+- `--js <str>`: Inserts a string of JS onto the page. Can be set multiple times.
 
-## Device and network emulation
+## Misc
 
-Test site: http://speedof.me/
+- `--help, -h`: Shows the builtin help.
+- `--debug`: Enables debugging mode, which shows additional logging information and renders the screenshots in a visible window.
+- `--version`: Shows version info for `electroshot` as well as the Chrome and Electron version used.
 
-Test site: http://www.mydevice.io/
+### Passing thru Chrome flags
 
-latency Double - RTT in ms
-downloadThroughput Double - Download rate in Bps
-uploadThroughput Double - Upload rate in Bps
+`electroshot` passes any unknown flags on to Chrome via Electron. Here are three useful flags:
 
-Setting multiple delays
+- `--ignore-certificate-errors`: Ignores certificate related errors.
+- `--force-device-scale-factor <n>`: Forces Chrome to use a specific hidpi scale factor.
+- `--proxy-server <address:port>`: Use a specified proxy server. Only affects HTTP and HTTPS requests.
 
-
-screenPosition String - Specify the screen type to emulate (default: desktop)
-desktop
-mobile
-screenSize Object - Set the emulated screen size (screenPosition == mobile)
-width Integer - Set the emulated screen width
-height Integer - Set the emulated screen height
-viewPosition Object - Position the view on the screen (screenPosition == mobile) (default: {x: 0, y: 0})
-x Integer - Set the x axis offset from top left corner
-y Integer - Set the y axis offset from top left corner
-deviceScaleFactor Integer - Set the device scale factor (if zero defaults to original device scale factor) (default: 0)
-viewSize Object - Set the emulated view size (empty means no override)
-width Integer - Set the emulated view width
-height Integer - Set the emulated view height
-fitToView Boolean - Whether emulated view should be scaled down if necessary to fit into available space (default: false)
-offset Object - Offset of the emulated view inside available space (not in fit to view mode) (default: {x: 0, y: 0})
-x Float - Set the x axis offset from top left corner
-y Float - Set the y axis offset from top left corner
-scale Float - Scale of emulated view inside available space (not in fit to view mode) (default: 1)
-
-
-UA: https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsloadurlurl-options
-
-enableDeviceEmulation: https://github.com/atom/electron/blob/master/docs/api/web-contents.md
-
-enableNetworkEmulation: https://github.com/atom/electron/blob/master/docs/api/session.md#sessionenablenetworkemulationoptions
+For more, see: https://github.com/atom/electron/blob/master/docs/api/chrome-command-line-switches.md and
+http://peter.sh/experiments/chromium-command-line-switches/.
 
 ## API
+
+TODO for now; will probably look something like:
 
 - resolve args
 - resolve mountpoints
 - run server
 - run electron
-
-# nonfeatures
-
-- thumbnails / montage
-- diffing: https://github.com/Huddle/Resemble.js
-  - test suite definitions (mocha compatible assertions)
-  - GUI with github-like previews
-    - generate two-way as image
-    - two-way
-    - three way https://github.com/stefanjudis/grunt-photobox
-    - side by side
-    - onion skin
-    - assertion name, assert message
-    - responsive sizes by default
-    - www_google_com_320x480.jpeg
-    - www_google_com_480x320.jpeg
-    - www_google_com_1024x768.jpeg
-    - www_google_com_768x1024.jpeg
-    - www_google_com_1280x768.jpeg

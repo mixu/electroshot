@@ -23,7 +23,7 @@ if (argv.v || argv.version) {
   return;
 }
 
-if (argv['list-network-conditions']) {
+if (argv['list-network-conditions'] || argv['list-networks'] || argv['list-network'] ) {
   console.log(networkConditions.map(function(net) {
     return [
       '--emulate-network  "' + net.title + '"',
@@ -34,7 +34,7 @@ if (argv['list-network-conditions']) {
   return;
 }
 
-if (argv['list-devices']) {
+if (argv['list-devices'] || argv['list-device']) {
   console.log(emulatedDevices.map(function(dev) {
     return [
       '--emulate-device "' + dev.device.title + '" || --emulate-device "horizontal ' + dev.device.title + '"',
@@ -55,6 +55,13 @@ if (argv.help || argv.h) {
 var baseUrl = 'http://' + argv.host + ':' + argv.port;
 var tasks = argsToTasks(process.argv.slice(2));
 var pairs = tasksToMountpoints(tasks, baseUrl);
+
+if (tasks.length === 0) {
+  console.log('No screenshot tasks were specified.');
+  console.log('Usage: electroshot <urls | paths> <resolutions | devices>');
+  console.log('Run `electroshot --help` for a list of all the CLI options.');
+  return;
+}
 
 // set up express server here - node probably already has permission to accept incoming connections whereas electron probably doesn't
 var server;

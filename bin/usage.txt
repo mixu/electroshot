@@ -106,11 +106,13 @@ OPTIONS - MISC
 
     --help, -h         Show this help.
 
+    --debug            Verbose debugging mode.
+
     --version, -v      Version info.
 
 CHROME FLAGS
 
-`shot` passes any unknown flags on to Chrome via Electron. Here are two useful flags:
+`electroshot` passes any unknown flags on to Chrome via Electron. Here are three useful flags:
 
     --ignore-certificate-errors       Ignores certificate related errors.
 
@@ -121,10 +123,3 @@ CHROME FLAGS
 
 For more, see: https://github.com/atom/electron/blob/master/docs/api/chrome-command-line-switches.md and
 http://peter.sh/experiments/chromium-command-line-switches/.
-
-
-TODO
-
-    --debug            Verbose debugging mode.
-
-    --max-wait <ms>    Set a maximum wait timer, after which a single screenshot is timed out. Good for automation.

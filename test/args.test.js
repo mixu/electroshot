@@ -715,6 +715,7 @@ describe('args to tasks', function() {
       }
     ]);
   });
+
   // device and --emulate-network are case insensitive
   // device and --emulate-network are separator-insensitive
 
@@ -723,6 +724,10 @@ describe('args to tasks', function() {
   // --debug (pop open electron window, verbose logging)
 
   // good looking messages V Generated 3 screenshots from 2 urls
+
+// TODO
+// --max-wait <ms>    Set a maximum wait timer, after which a single screenshot is timed out. Good for automation.
+
 
   // Later:
   // --delay name of callback
