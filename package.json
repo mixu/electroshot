@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Capture website screenshots with optional device and network emulation as jpg, png or pdf (with web fonts!) using Electron / Chrome.",
   "main": "test.js",
+  "bin": {
+    "electroshot": "./bin/electroshot.js"
+  },
   "scripts": {
     "test": "mocha -R spec --bail ./test/*.test.js"
   },
