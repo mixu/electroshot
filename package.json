@@ -11,10 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:mixu/electroshot.git"
+    "url": "git@github.com:mixu/electroshot.git"
   },
   "author": "Mikito Takada <mikito.takada@gmail.com> (http://mixu.net/)",
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "chromium-emulated-devices": "~1.0.0",
     "chromium-emulated-networks": "~1.0.0",
