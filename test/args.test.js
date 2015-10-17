@@ -8,6 +8,9 @@ var oldArgsToTasks = argsToTasks;
 argsToTasks = function(args) {
   var result = oldArgsToTasks(args);
   result.forEach(function(task) {
+    if (typeof task.debug === 'boolean' && !task.debug) {
+      delete task.debug;
+    }
     if (task.delay === 0) {
       delete task.delay;
     }
@@ -200,32 +203,6 @@ describe('args to tasks', function() {
         url: 'http://127.0.0.1:8000/',
         size: { width: 1024, height: 768 },
         out: process.cwd() + '/127.0.0.1-1024x768.png'
-      }
-    ]);
-  });
-
-
-  it('when no resolution is set, use responsive breakpoints', function() {
-    assert.deepEqual(argsToTasks(['google.com']), [
-      {
-        url: 'http://google.com/',
-        size: { width: 1200, height: 0 },
-        out: process.cwd() + '/google.com-1200x0.png'
-      },
-      {
-        url: 'http://google.com/',
-        size: { width: 980, height: 0 },
-        out: process.cwd() + '/google.com-980x0.png'
-      },
-      {
-        url: 'http://google.com/',
-        size: { width: 768, height: 0 },
-        out: process.cwd() + '/google.com-768x0.png'
-      },
-      {
-        url: 'http://google.com/',
-        size: { width: 480, height: 0 },
-        out: process.cwd() + '/google.com-480x0.png'
       }
     ]);
   });

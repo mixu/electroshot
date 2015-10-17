@@ -6,7 +6,7 @@ var fs = require('fs'),
     spawn = require('child_process').spawn;
 
 var fixture = require('file-fixture');
-var binpath = path.normalize(__dirname + '/../bin/shot.js');
+var binpath = path.normalize(__dirname + '/../bin/electroshot.js');
 
 function md5(filename) {
   var hash = crypto.createHash('md5');
@@ -100,6 +100,7 @@ describe('integration tests', function() {
       '--out', tmpDir,
        ], process.cwd(), function() {
         assert.ok([
+            '3a60ca00f2841351110ab62c78cc1f7e',
             'b42d35b26ff2d5aab7eebc9fd1bccadc',
             '21d28dbf925e0a0152ff4d2785733f30', // OSX
             '2298cb9cb647cdafe04261ffa1cbbef5', // OSX (2x)
