@@ -20,6 +20,11 @@ Capture website screenshots with optional device and network emulation as JPG, P
 - Supports Chrome's network condition emulation options (RTT latency and bandwidth throttling)
   - ... which (with `--delay`) make it easy to produce a page load timeline
 
+## Changelog
+
+- `v1.2.0` adds Windows-related fixes
+- `v1.1.0` upgrades electron for 2017
+
 ## Quickstart
 
 Install `electroshot` via npm (to get npm, just [install Node.js](http://nodejs.org/download/)):
