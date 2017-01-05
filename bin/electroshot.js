@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 var fs = require('fs'),
     path = require('path'),
-    spawn = require('child_process').spawn;
+    spawn = require('child_process').spawn,
+    os = require('os');
 
 var electron = require('electron'),
     express = require('express'),
@@ -80,8 +81,10 @@ if (pairs.length > 0) {
 
 // run electron and pipe the tasks into it
 function runElectron() {
+  var configFile = os.tmpdir() + '/electroshot-config.json';
+
   var electronArgs = [
-    __dirname + '/../electron/index.js'
+    path.join(__dirname, '..', 'electron', 'index.js')
   ].concat(Object.keys(argv).filter(function(key) {
     return typeof defaultOptions[key] === 'undefined' && key !== '_' || key === 'debug';
   }).reduce(function(all, key) {
@@ -90,13 +93,13 @@ function runElectron() {
     } else {
       return all.concat('--' + (!argv[key] ? 'no-' : '') + key);
     }
-  }, []));
+  }, [])).concat(['--config', configFile]);
 
-  var child = spawn(electron, electronArgs, {
-      stdio: ['pipe', process.stdout, process.stderr]
-  });
+  // Windows does not support piped stdio on GUI programs like electron
+  // see https://github.com/electron/electron/issues/4218
+  fs.writeFileSync(configFile, JSON.stringify(tasks));
 
-  child.stdin.end(JSON.stringify(tasks));
+  var child = spawn(electron, electronArgs, {stdio: 'ignore'});
 
   child.on('exit', function(code) {
     if (server) {

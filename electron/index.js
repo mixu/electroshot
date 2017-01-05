@@ -36,12 +36,12 @@ app.on('window-all-closed', function() {
   app.quit();
 });
 
+var buffer = fs.readFileSync(argv.config, 'utf8');
+
 app.on('ready', function() {
-  var buffer = '';
-  process.stdin.on('data', function(data) {
-    buffer += data.toString();
-  });
-  process.stdin.once('end', function() {
+  try {
     runTasks(JSON.parse(buffer));
-  });
+  } catch (e) {
+    console.log(e);
+  }
 });
