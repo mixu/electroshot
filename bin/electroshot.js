@@ -3,7 +3,7 @@ var fs = require('fs'),
     path = require('path'),
     spawn = require('child_process').spawn;
 
-var electron = require('electron-prebuilt'),
+var electron = require('electron'),
     express = require('express'),
     subarg = require('subarg'),
     xtend = require('xtend'),

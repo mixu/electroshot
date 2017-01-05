@@ -2,8 +2,8 @@ var fs = require('fs'),
     os = require('os'),
     path = require('path');
 
-var ipc = require('ipc'),
-    BrowserWindow = require('browser-window'),
+var ipc = require('electron').ipcMain,
+    BrowserWindow = require('electron').BrowserWindow,
     xtend = require('xtend');
 
 var log = require('minilog')('electron');
@@ -17,7 +17,7 @@ function TargetWindow() {
 // sync initialization
 TargetWindow.prototype.initialize = function(task, onDone) {
   var self = this;
-  var display = require('screen');
+  var display = require('electron').screen;
   var browserOpts = {
     show: true,
     // SEGFAULTS on linux (!) with Electron 0.33.7 (!!)
@@ -64,7 +64,7 @@ TargetWindow.prototype.initialize = function(task, onDone) {
     //this.window.setMaximumSize(task.device.screenSize.width, task.device.screenSize.height);
   }
 
-  this.window.loadUrl(task.url, task['user-agent'] !== '' ? { userAgent: task['user-agent'] } : {});
+  this.window.loadURL(task.url, task['user-agent'] !== '' ? { userAgent: task['user-agent'] } : {});
   // this happens before the page starts executing
   if (task.device) {
     this.window.webContents.enableDeviceEmulation(task.device);
@@ -180,7 +180,7 @@ TargetWindow.prototype.reset = function() {
   if (this.task.cookies) {
     // TODO wait
     this.task.cookies.forEach(function(cookie) {
-      self.window.webContents.session.cookies.remove(cookie, function() {});
+      self.window.webContents.session.cookies.remove(cookie.url, cookie.name, function() {});
     });
   }
   // reset network emulation
@@ -237,7 +237,7 @@ TargetWindow.prototype.capture = function(dims, onDone) {
 TargetWindow.prototype.pdf = function(onDone) {
   var self = this;
   var task = this.task;
-  this.window.printToPDF(xtend({
+  this.window.webContents.printToPDF(xtend({
     pageSize: 'A4',
     marginsType: 0,
     printBackground: false,

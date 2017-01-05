@@ -20,8 +20,11 @@ argsToTasks = function(args) {
     if (task['user-agent'] === '') {
       delete task['user-agent'];
     }
-    if (task['cookie'] === '') {
-      delete task['cookie'];
+    if (task.cookie === '') {
+      delete task.cookie;
+    }
+    if (task.root === '') {
+      delete task.root;
     }
     if (!task.js) {
       delete task.js;

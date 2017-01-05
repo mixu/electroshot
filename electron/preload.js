@@ -1,5 +1,5 @@
-var ipc = require('ipc');
-var webFrame = require('web-frame');
+var ipc = require('electron').ipcRenderer;
+var webFrame = require('electron').webFrame;
 
 function waitFor(num, onDone) {
   if (num) {
@@ -15,8 +15,8 @@ function waitFor(num, onDone) {
     });
   });
 }
-ipc.on('ensure-rendered', function ensureRendered(delay, eventName) {
-  console.log('RECEIVE', 'ensure-rendered');
+ipc.on('ensure-rendered', function ensureRendered(event, delay, eventName) {
+  console.log('RECEIVE', 'ensure-rendered', delay, eventName);
   try {
     var style = document.createElement('style');
     // WebKit hack :(
@@ -31,7 +31,7 @@ ipc.on('ensure-rendered', function ensureRendered(delay, eventName) {
   });
 });
 
-ipc.on('get-dimensions', function ensureRendered(selector) {
+ipc.on('get-dimensions', function ensureRendered(event, selector) {
   console.log('get-dimensions', selector);
   var result;
   try {
@@ -59,7 +59,7 @@ ipc.on('get-content-dimensions', function() {
   });
 });
 
-ipc.on('set-zoom-factor', function(factor) {
+ipc.on('set-zoom-factor', function(event, factor) {
   console.log('set-zoom-factor', factor);
   webFrame.setZoomFactor(factor);
   ipc.send('return-zoom-factor');
