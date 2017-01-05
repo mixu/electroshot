@@ -1,6 +1,6 @@
 {
   "name": "electroshot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Capture website screenshots with optional device and network emulation as jpg, png or pdf (with web fonts!) using Electron / Chrome.",
   "main": "test.js",
   "bin": {
