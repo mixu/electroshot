@@ -193,7 +193,7 @@ Most headless (e.g. no X11) environments will need some additional packages to b
 # Install dependencies
 apt-get update &&\
     apt-get install -y libgtk2.0-0 libgconf-2-4 \
-    libasound2 libxtst6 libxss1 libnss3 xvfb
+    libasound2 libxtst6 libxss1 libnss3 xvfb ttf-mscorefonts-installer
 
 # Start Xvfb
 Xvfb -ac -screen scrn 1280x2000x24 :9.0 &
