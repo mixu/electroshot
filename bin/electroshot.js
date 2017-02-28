@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var fs = require('fs'),
     path = require('path'),
+    process = require('process'),
     spawn = require('child_process').spawn,
     os = require('os');
 
@@ -107,6 +108,7 @@ function runElectron() {
     }
     if (code !== 0) {
       console.log('Electron exited with code ' + code);
+      process.exit(code);
     } else {
       console.log(logSymbols.success, 'Generated ' + tasks.length + ' screenshot' + (tasks.length > 1 ? 's' : '') + '.');
     }
