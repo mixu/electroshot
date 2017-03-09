@@ -20,6 +20,7 @@ TargetWindow.prototype.initialize = function(task, onDone) {
   var display = require('electron').screen;
   var browserOpts = {
     show: true,
+    // SEGFAULTS on linux (!) with Electron 0.33.7 (!!)
     'enableLargerThanScreen': (os.platform() !== 'linux'),
     'skip-taskbar': true,
     'use-content-size': true,
