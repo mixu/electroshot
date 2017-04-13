@@ -100,7 +100,7 @@ function runElectron() {
   // see https://github.com/electron/electron/issues/4218
   fs.writeFileSync(configFile, JSON.stringify(tasks));
 
-  var child = spawn(electron, electronArgs, {stdio: 'ignore'});
+  var child = spawn(electron, electronArgs, {stdio: argv.debug ? 'inherit' : 'ignore'});
 
   child.on('exit', function(code) {
     if (server) {

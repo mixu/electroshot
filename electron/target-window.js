@@ -4,7 +4,8 @@ var fs = require('fs'),
 
 var ipc = require('electron').ipcMain,
     BrowserWindow = require('electron').BrowserWindow,
-    xtend = require('xtend');
+    xtend = require('xtend'),
+    parallel = require('miniq');
 
 var log = require('minilog')('electron');
 
@@ -51,7 +52,6 @@ TargetWindow.prototype.initialize = function(task, onDone) {
 
   // width, height
   this.window.setContentSize(task.size.width, task.size.height || 768);
-
 
   if (task.device) {
     // useful: set the size exactly (contentsize is not useful here)
@@ -106,7 +106,7 @@ TargetWindow.prototype.initialize = function(task, onDone) {
 TargetWindow.prototype.completeInit = function(task, onDone) {
   if (task.delay !== 0) {
     // executeJavaScript runs after the page is loaded, so we cannot use it with delays (!)
-    // Note that zoom-factor and selector are incompatible ...
+    // Note that zoom-factor, selector, js and css are incompatible ...
     setTimeout(function() {
       onDone();
     }, task.delay);
@@ -126,24 +126,61 @@ TargetWindow.prototype.setUpPreloadedListener = function(task, onDone) {
     ipc.once('loaded', function() {
       log.debug('IPC', 'loaded');
 
-      if (task.size.height > 0) {
-        return onDone();
-      }
-      // ensure window is sized to full content ...
-      ipc.once('return-content-dimensions', function(event, dims) {
-        if (dims.height > task.size.height) {
-          console.log('Increasing window size to ' + task.size.width + 'x' + dims.height);
-          self.window.setSize(task.size.width, dims.height);
-          // wait another 2 frames
-          ipc.once('loaded', function() {
-            onDone();
+      var tasks = [
+        task.css ? function(onTaskDone) {
+          // insertCSS returns immediately :'(
+          (Array.isArray(task.css) ? task.css : [ task.css ]).forEach(function(css) {
+            self.insertCSS(css);
           });
-          self.window.webContents.send('ensure-rendered', 0, 'loaded');
-          return;
-        }
-        onDone();
-      });
-      self.window.webContents.send('get-content-dimensions');
+
+          // wait another 2 frames
+          ipc.once('css-loaded', function() {
+            onTaskDone();
+          });
+          self.window.webContents.send('waitfor', 0, 'css-loaded');
+        } : false,
+        task.size.height == 0 ? function(onTaskDone) {
+          // ensure window is sized to full content ...
+          ipc.once('return-content-dimensions', function(event, dims) {
+            if (dims.height > task.size.height) {
+              console.log('Increasing window size to ' + task.size.width + 'x' + dims.height);
+              self.window.setSize(task.size.width, dims.height);
+              // wait another 2 frames
+              ipc.once('content-dimensions-loaded', function() {
+                onTaskDone();
+              });
+              self.window.webContents.send('waitfor', 0, 'content-dimensions-loaded');
+              return;
+            }
+            onTaskDone();
+          });
+          self.window.webContents.send('get-content-dimensions');
+        } : false,
+      ].filter(Boolean);
+
+      // add individual tasks for each --js since we can wait on the individual promises
+      if (task.js) {
+        (Array.isArray(task.js) ? task.js : [ task.js ]).forEach(function(js) {
+          tasks.push(function(onTaskDone) {
+            log.debug('ExecuteJS', js);
+            self.window.webContents.executeJavaScript(js, false, function() {
+              onTaskDone();
+            });
+          });
+        });
+        tasks.push(function(onTaskDone) {
+          log.debug('Wait after js');
+          // wait another 2 frames - the JS itself might be doing something that requires a rerender
+          ipc.once('js-done', function() {
+            onTaskDone();
+          });
+          self.window.webContents.send('waitfor', 0, 'js-done');
+        });
+      }
+      console.log(tasks);
+
+      // run all tasks
+      parallel(1, tasks, onDone);
     });
 
     // webContents configuration
@@ -256,10 +293,6 @@ TargetWindow.prototype.pdf = function(onDone) {
 
 TargetWindow.prototype.insertCSS = function(css) {
   this.window.webContents.insertCSS(css);
-};
-
-TargetWindow.prototype.executeJS = function(js) {
-  this.window.webContents.executeJavaScript(js);
 };
 
 TargetWindow.prototype.close = function() {

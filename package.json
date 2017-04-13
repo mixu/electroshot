@@ -30,5 +30,8 @@
     "subarg": "~1.0.0",
     "tough-cookie": "~2.3.2",
     "xtend": "~4.0.0"
+  },
+  "devDependencies": {
+    "mocha": "~3.2.0"
   }
 }

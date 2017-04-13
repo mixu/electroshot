@@ -15,6 +15,15 @@ function waitFor(num, onDone) {
     });
   });
 }
+ipc.on('waitfor', function ensureRendered(event, delay, eventName) {
+  console.log('RECEIVE', 'waitfor', delay, eventName);
+  waitFor(delay, function() {
+    console.log('SEND', eventName);
+    ipc.send(eventName);
+  });
+});
+
+
 ipc.on('ensure-rendered', function ensureRendered(event, delay, eventName) {
   console.log('RECEIVE', 'ensure-rendered', delay, eventName);
   try {

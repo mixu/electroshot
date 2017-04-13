@@ -167,7 +167,7 @@ describe('integration tests', function() {
     var assertions = 0;
     var rand = Math.random().toString(36).substring(2);
     var server = http.createServer(function(req, res) {
-      assert.equal(req.headers.cookie, 'priority=' + rand);
+      assert.notEqual(req.headers.cookie.indexOf('priority=' + rand), -1);
       assertions++;
       res.end('<html></html>');
     }).listen(3000, function() {
@@ -182,6 +182,7 @@ describe('integration tests', function() {
   });
 
   it('can capture a PDF', function(done) {
+    this.timeout(10000);
     var tmpDir = fixture.dirname();
     run([
       '--format', 'pdf',
@@ -201,12 +202,41 @@ describe('integration tests', function() {
 
   });
 
-  it('accepts --js <str>');
+  it('accepts --js <str> --js <str>', function(done) {
+    this.timeout(10000);
+    var tmpDir = fixture.dirname();
+    run([
+      '--js', "document.querySelector('body').style.backgroundColor = 'red';",
+      '--js', "var e = document.querySelector('p'); e.style.fontSize = '20px'; e.style.color = 'white';",
+      __dirname + '/fixtures/basic.html', '100x100',
+      '--out', tmpDir
+    ], process.cwd(), function() {
+       assert.ok([
+        // TODO add linux md5
+        'd524ebddc2c459132a169379998334b3', // OSX (2x)
+      ].indexOf(md5(tmpDir + '/basic-100x100.png')) !== -1);
+      done();
+    });
+  });
   it('accepts --js <path>');
-  it('accepts --js <str> --js <str>');
-  it('accepts --css <str>');
+
+  it('accepts --css <str> --css <str>', function(done) {
+    this.timeout(10000);
+    var tmpDir = fixture.dirname();
+    run([
+      '--css', 'body { background-color: red; }',
+      '--css', 'p { font-size: 20px; color: white; }',
+      __dirname + '/fixtures/basic.html', '100x100',
+      '--out', tmpDir
+    ], process.cwd(), function() {
+       assert.ok([
+        // TODO add linux md5
+        'd524ebddc2c459132a169379998334b3', // OSX (2x)
+      ].indexOf(md5(tmpDir + '/basic-100x100.png')) !== -1);
+      done();
+    });
+  });
   it('accepts --css <path>');
-  it('accepts --css <str> --css <str>');
 
 
   it('accepts --stdin-html + html');

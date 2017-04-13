@@ -9,19 +9,6 @@ module.exports = function(tasks) {
       log.debug(task);
 
       targetWindow.initialize(task, function() {
-        // --css
-        if (task.css) {
-          (Array.isArray(task.css) ? task.css : [ task.css ]).forEach(function(css) {
-            targetWindow.insertCSS(css);
-          });
-        }
-        // --js
-        if (task.js) {
-          (Array.isArray(task.js) ? task.js : [ task.js ]).forEach(function(js) {
-            targetWindow.executeJS(js);
-          });
-        }
-
         if (task.format === 'pdf') {
           targetWindow.pdf(done);
         } else if (task.selector) {
