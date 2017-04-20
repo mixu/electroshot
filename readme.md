@@ -112,7 +112,7 @@ electroshot google.com 1024 --out /foo/bar
 # -> writes /foo/bar/screenshot.png
 electroshot google.com 1024 --out /foo/bar --filename "screenshot.png"
 # -> writes /foo/bar/google.com-linux.png
-electroshot google.com 1024 --filename "/foo/bar/{name}-{platform}{format}"
+electroshot google.com 1024 --filename "/foo/bar/{name}-{platform}.{format}"
 ```
 
 You can also use the following tokens to specify a template for filenames. The default template is `{name}-{size}.{format}`; if you set a `--delay`, it is `{name}-{size}-at-{delay}ms.{format}`.
