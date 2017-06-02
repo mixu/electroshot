@@ -2,35 +2,22 @@ var ipc = require('electron').ipcRenderer;
 var webFrame = require('electron').webFrame;
 
 function waitFor(wait, onDone) {
-  if (typeof wait === 'number') {
-    setTimeout(onDone, wait);
-    return;
-  }
-  if (typeof wait === 'string') {
-    var timer = setInterval(function(){
-      if (!!document.getElementById(wait) === true) {
-        clearInterval(timer);
-        console.log('WAIT Condition Passed! Calling Done Now.');
-        onDone();
-      }
-    }, 10);
-    // Fallback max wait time
-    setTimeout(function(){
-      console.log('WAIT Condition still not true, timeout is 10 mintues, calling Done now.');
+  var timer = setInterval(function(){
+    if (!!document.getElementById('pdf-page-header') === true) {
       clearInterval(timer);
+      console.log('WAIT Condition Passed! Calling Done Now.');
       onDone();
-    }, (1000 * 60 * 10));
-    return;
-  }
-
-  // requestAnimationFrame's callback happens right before a paint. So, it takes two calls
-  // before we can be confident that one paint has happened.
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      onDone();
-    });
-  });
+    }
+  }, 10);
+  // Fallback max wait time
+  setTimeout(function(){
+    console.log('WAIT Condition still not true, timeout is 10 mintues, calling Done now.');
+    clearInterval(timer);
+    onDone();
+  }, (1000 * 60 * 100));
+  return;
 }
+
 ipc.on('waitfor', function ensureRendered(event, delay, eventName) {
   console.log('RECEIVE', 'waitfor', delay, eventName);
   waitFor(delay, function() {
