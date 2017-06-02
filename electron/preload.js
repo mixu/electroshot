@@ -1,9 +1,25 @@
 var ipc = require('electron').ipcRenderer;
 var webFrame = require('electron').webFrame;
 
-function waitFor(num, onDone) {
-  if (num) {
-    setTimeout(onDone, num);
+function waitFor(wait, onDone) {
+  if (typeof wait === 'number') {
+    setTimeout(onDone, wait);
+    return;
+  }
+  if (typeof wait === 'function') {
+    var timer = setInterval(function(){
+      if (wait() === true) {
+        clearInterval(timer);
+        console.log('WAIT Condition Passed! Calling Done Now.');
+        onDone();
+      }
+    }, 10);
+    // Fallback max wait time
+    setTimeout(function(){
+      console.log('WAIT Condition still not true, timeout is 10 mintues, calling Done now.');
+      clearInterval(timer);
+      onDone();
+    }, (1000 * 60 * 10));
     return;
   }
 
