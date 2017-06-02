@@ -14,7 +14,7 @@ function waitFor(wait, onDone) {
     console.log('WAIT Condition still not true, timeout is 10 mintues, calling Done now.');
     clearInterval(timer);
     onDone();
-  }, (1000 * 60 * 100));
+  }, (1000 * 60 * 10));
   return;
 }
 
