@@ -6,9 +6,9 @@ function waitFor(wait, onDone) {
     setTimeout(onDone, wait);
     return;
   }
-  if (typeof wait === 'function') {
+  if (typeof wait === 'string') {
     var timer = setInterval(function(){
-      if (wait() === true) {
+      if (!!document.getElementById(wait) === true) {
         clearInterval(timer);
         console.log('WAIT Condition Passed! Calling Done Now.');
         onDone();
