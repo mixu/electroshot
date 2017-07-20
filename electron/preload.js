@@ -51,10 +51,10 @@ ipc.on('get-dimensions', function ensureRendered(event, selector) {
     return;
   }
   ipc.send('return-dimensions', {
-    x: result.top,
-    y: result.left,
-    width: result.right - result.left,
-    height: result.bottom - result.top,
+    x: Math.floor(result.left),
+    y: Math.floor(result.top),
+    width: Math.ceil(result.right - result.left),
+    height: Math.ceil(result.bottom - result.top),
   });
 });
 
