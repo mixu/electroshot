@@ -212,7 +212,7 @@ describe('integration tests', function() {
       '--out', tmpDir
     ], process.cwd(), function() {
        assert.ok([
-        // TODO add linux md5
+        'c635c5db8725d6e6fbce8a7092a4c839',
         'd524ebddc2c459132a169379998334b3', // OSX (2x)
       ].indexOf(md5(tmpDir + '/basic-100x100.png')) !== -1);
       done();
@@ -230,7 +230,7 @@ describe('integration tests', function() {
       '--out', tmpDir
     ], process.cwd(), function() {
        assert.ok([
-        // TODO add linux md5
+        'c635c5db8725d6e6fbce8a7092a4c839',
         'd524ebddc2c459132a169379998334b3', // OSX (2x)
       ].indexOf(md5(tmpDir + '/basic-100x100.png')) !== -1);
       done();

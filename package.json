@@ -19,9 +19,9 @@
     "chromium-emulated-devices": "~1.0.0",
     "chromium-emulated-networks": "~1.0.0",
     "cookie": "~0.3.1",
-    "electron": "~1.4.13",
+    "electron": "~1.6.11",
     "es6-template": "~1.0.3",
-    "express": "~4.14.0",
+    "express": "~4.15.3",
     "file-fixture": "0.0.2",
     "log-symbols": "~1.0.2",
     "minilog": "~3.1.0",
@@ -32,6 +32,6 @@
     "xtend": "~4.0.0"
   },
   "devDependencies": {
-    "mocha": "~3.2.0"
+    "mocha": "~3.4.2"
   }
 }
