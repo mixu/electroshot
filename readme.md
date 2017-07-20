@@ -22,6 +22,7 @@ Capture website screenshots with optional device and network emulation as JPG, P
 
 ## Changelog
 
+- `v1.3.0` upgrades to Electron 1.6.11 (Chromium 56) & fixes a rounding bug (thanks shawnbot!).
 - `v1.2.0` adds Windows-related fixes
 - `v1.1.0` upgrades electron for 2017
 
