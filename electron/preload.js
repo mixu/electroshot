@@ -6,7 +6,7 @@ function waitFor(wait, onDone) {
     if (!!document.getElementById('pdf-page-header') === true) {
       clearInterval(timer);
       console.log('WAIT Condition Passed! Calling Done Now.');
-      onDone();
+      setTimeout(onDone, 1000);
     }
   }, 10);
   // Fallback max wait time
