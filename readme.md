@@ -22,6 +22,9 @@ Capture website screenshots with optional device and network emulation as JPG, P
 
 ## Changelog
 
+- `v1.4.1` Applying Yeti patches
+- `v1.4.0` upgrades to Electron 1.6.11 (Chromium 56) & fixes a rounding bug (thanks shawnbot!).
+- `v1.3.0` fixes the ability to extend the window size to be beyond screen height (thanks danielkalen!) and makes Electroshot exit with the same exit code as Electron (thanks handcraftedbits!)
 - `v1.2.0` adds Windows-related fixes
 - `v1.1.0` upgrades electron for 2017
 
@@ -112,7 +115,7 @@ electroshot google.com 1024 --out /foo/bar
 # -> writes /foo/bar/screenshot.png
 electroshot google.com 1024 --out /foo/bar --filename "screenshot.png"
 # -> writes /foo/bar/google.com-linux.png
-electroshot google.com 1024 --filename "/foo/bar/{name}-{platform}{format}"
+electroshot google.com 1024 --filename "/foo/bar/{name}-{platform}.{format}"
 ```
 
 You can also use the following tokens to specify a template for filenames. The default template is `{name}-{size}.{format}`; if you set a `--delay`, it is `{name}-{size}-at-{delay}ms.{format}`.
