@@ -23,7 +23,7 @@
     "es6-template": "~1.0.3",
     "express": "~4.17.1",
     "file-fixture": "0.0.2",
-    "log-symbols": "~5.0.0",
+    "log-symbols": "~1.0.2",
     "minilog": "~3.1.0",
     "miniq": "~1.0.0",
     "sanitize-filename": "~1.6.1",
