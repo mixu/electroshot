@@ -1,6 +1,6 @@
 {
   "name": "@yeti-dev/electroshot",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "Capture website screenshots with optional device and network emulation as jpg, png or pdf (with web fonts!) using Electron / Chrome.",
   "main": "test.js",
   "bin": {
