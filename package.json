@@ -19,7 +19,7 @@
     "chromium-emulated-devices": "~1.0.0",
     "chromium-emulated-networks": "~1.0.0",
     "cookie": "~0.3.1",
-    "electron": "~15.0.0",
+    "electron": "~1.8.8",
     "es6-template": "~1.0.3",
     "express": "~4.14.0",
     "file-fixture": "0.0.2",
